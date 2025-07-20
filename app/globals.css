@@ -2,26 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Import DM Sans or Poppins from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap');
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'DM Sans', 'Poppins', 'Geist', 'Geist Mono', 'sans-serif';
+  background: linear-gradient(135deg, #181824 0%, #232347 50%, #0f0f1c 100%);
+  color: #e0e0e0;
+  transition: background 0.5s, color 0.5s;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+html.dark body {
+  background: linear-gradient(135deg, #181824 0%, #232347 50%, #0f0f1c 100%);
+  color: #e0e0e0;
+}
+
+html.light body {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  color: #232347;
+}
+
+.glass-card {
+  background: rgba(32, 34, 54, 0.7);
+  box-shadow: 0 4px 32px 0 rgba(127, 90, 240, 0.15), 0 1.5px 8px 0 rgba(0, 217, 255, 0.10);
+  border-radius: 1rem;
+  border: 1.5px solid rgba(127, 90, 240, 0.4);
+  backdrop-filter: blur(12px);
+}
+
+.animate-glow {
+  box-shadow: 0 0 16px 4px #7f5af0, 0 0 32px 8px #00d9ff;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 16px 4px #7f5af0, 0 0 32px 8px #00d9ff;
   }
+  to {
+    box-shadow: 0 0 32px 8px #00d9ff, 0 0 16px 4px #7f5af0;
+  }
+}
+
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px #7f5af0) drop-shadow(0 0 4px #00d9ff);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/10 dark:bg-dark-200/50 backdrop-blur-md border border-white/20 dark:border-gray-600/30 rounded-xl shadow-xl;
+  }
+
+  .cyber-glow {
+    box-shadow: 0 0 20px rgba(127, 90, 240, 0.3);
+  }
+
+  .cyber-glow:hover {
+    box-shadow: 0 0 40px rgba(127, 90, 240, 0.6);
+  }
+
+         @keyframes grid-move {
+           0% {
+             transform: translate(0, 0);
+           }
+    
+           100% {
+             transform: translate(50px, 50px);
+           }
+         }
 }
