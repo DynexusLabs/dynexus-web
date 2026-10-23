@@ -44,7 +44,13 @@ export default function WalletButton() {
   const close = useCallback(() => setOpen(false), []);
   const ref = useDismiss(open, close);
   const address = account?.address.toString();
-  const { wrongNetwork, canSwitch, switching, switchNetwork } = useNetworkSwitch();
+  const {
+    wrongNetwork,
+    canSwitch,
+    switching,
+    error: switchError,
+    switchNetwork,
+  } = useNetworkSwitch();
 
   const copy = async () => {
     if (!address) return;
@@ -114,6 +120,7 @@ export default function WalletButton() {
               {switching ? "Check your wallet…" : `Switch to ${NETWORK_LABEL}`}
             </button>
           )}
+          {switchError && <p className="px-3 pb-2 text-xs text-danger">{switchError}</p>}
           <button type="button" role="menuitem" onClick={copy} className={menuItem}>
             {copied ? (
               <CheckIcon className="h-4 w-4 text-success" />

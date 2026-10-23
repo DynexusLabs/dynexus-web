@@ -1,7 +1,7 @@
 "use client";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useState } from "react";
-import { NETWORK } from "@/lib/config";
+import { NETWORK, NETWORK_LABEL } from "@/lib/config";
 
 /** Wallet/app network mismatch, plus an in-wallet switch when the wallet supports aptos:changeNetwork. */
 export function useNetworkSwitch() {
@@ -16,8 +16,14 @@ export function useNetworkSwitch() {
   async function switchNetwork() {
     setSwitching(true);
     setError(undefined);
+    const manual = `Switch to ${NETWORK_LABEL} in ${wallet?.name ?? "your wallet"}'s settings.`;
     try {
-      await changeNetwork(NETWORK);
+      // A wallet can approve the request yet refuse the switch: it resolves with success: false.
+      const res = await changeNetwork(NETWORK);
+      if (!res.success) throw new Error(res.reason ? `${res.reason}. ${manual}` : manual);
+      const actual = await wallet?.features["aptos:network"]?.network();
+      if (actual && actual.name.toLowerCase() !== String(NETWORK).toLowerCase())
+        throw new Error(`${wallet?.name} stayed on ${actual.name}. ${manual}`);
     } catch (e) {
       // The adapter rethrows plain strings, not Error instances.
       const msg = e instanceof Error ? e.message : String(e);
