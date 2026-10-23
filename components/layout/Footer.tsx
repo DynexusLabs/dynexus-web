@@ -45,7 +45,7 @@ export function Footer() {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-primary-500 to-cyan-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-r from-primary-500 to-cyan-400">
                   <span className="text-sm font-bold text-white">D</span>
                 </div>
                 <span className="text-xl font-bold gradient-text">Dynexus</span>

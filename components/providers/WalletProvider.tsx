@@ -1,27 +1,31 @@
 "use client";
 
-import { Network } from "@aptos-labs/ts-sdk";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import type { PropsWithChildren } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type PropsWithChildren, useState } from "react";
+import { APTOS_API_KEY, NETWORK } from "@/lib/config";
 
 const WalletProvider = ({ children }: PropsWithChildren) => {
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { staleTime: 10_000, retry: 1 } } }),
+  );
   return (
-    <AptosWalletAdapterProvider
-      autoConnect={true}
-      optInWallets={["Petra"]}
-      disableTelemetry={true}
-      dappConfig={{
-        network: Network.DEVNET,
-        aptosApiKeys: {
-          devnet: process.env.NEXT_PUBLIC_APTOS_DEVNET_API_KEY || "",
-        },
-      }}
-      onError={(error) => {
-        console.log("error", error);
-      }}
-    >
-      {children}
-    </AptosWalletAdapterProvider>
+    <QueryClientProvider client={queryClient}>
+      <AptosWalletAdapterProvider
+        autoConnect={true}
+        optInWallets={["Petra", "Nightly", "OKX Wallet"]}
+        disableTelemetry={true}
+        dappConfig={{
+          network: NETWORK,
+          aptosApiKeys: APTOS_API_KEY ? { [NETWORK]: APTOS_API_KEY } : undefined,
+        }}
+        onError={(error) => {
+          console.error("wallet error", error);
+        }}
+      >
+        {children}
+      </AptosWalletAdapterProvider>
+    </QueryClientProvider>
   );
 };
 

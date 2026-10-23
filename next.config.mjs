@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Linting is done by Biome (`bun run lint`), not ESLint.
-  eslint: { ignoreDuringBuilds: true },
+  reactStrictMode: true,
+  poweredByHeader: false,
 };
 
 export default nextConfig;

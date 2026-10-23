@@ -27,7 +27,7 @@ export const DropdownMenuContent = ({
   // In a real app, you'd want to handle focus, click outside, etc.
   return (
     <div
-      className={`absolute z-50 mt-2 min-w-[10rem] ${
+      className={`absolute z-50 mt-2 min-w-40 ${
         align === "end" ? "right-0" : "left-0"
       } ${className}`}
       role="menu"
@@ -47,7 +47,7 @@ export const DropdownMenuItem = ({
   className?: string;
 }) => (
   <div
-    className={`px-4 py-2 cursor-pointer select-none transition-colors rounded ${className}`}
+    className={`px-4 py-2 cursor-pointer select-none transition-colors rounded-sm ${className}`}
     role="menuitem"
     tabIndex={0}
     onClick={onClick}
