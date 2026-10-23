@@ -87,7 +87,7 @@ function LockPanel({ dyna }: { dyna: string }) {
   return (
     <Panel title="Lock DYNA → veDYNA">
       {hasLock && (
-        <div className="mb-4 space-y-1 rounded-lg bg-black/40 p-3 text-sm">
+        <div className="mb-4 space-y-1 rounded-xl border border-line bg-surface-2/60 p-3 text-sm">
           <p>
             Locked: <TokenAmount address={dyna} amount={lock.amount} />
           </p>
@@ -95,7 +95,7 @@ function LockPanel({ dyna }: { dyna: string }) {
             Unlocks: {new Date(lock.unlock * 1000).toLocaleDateString()}{" "}
             {expired ? "(expired)" : `(in ${timeLeft(lock.unlock)})`}
           </p>
-          <p className="text-cyan-200">
+          <p className="text-fg">
             Voting power: {meta ? fromUnits(lock.power, meta.decimals) : "…"}
           </p>
         </div>
@@ -133,7 +133,7 @@ function LockPanel({ dyna }: { dyna: string }) {
               ))}
             </select>
           </Field>
-          <p className="mb-4 text-xs text-cyan-400/60">
+          <p className="mb-4 text-xs text-subtle">
             Power = amount × remaining time / 4 years, decaying to 0 at unlock. Unlock rounds down
             to a weekly boundary.
           </p>
@@ -161,7 +161,7 @@ function LockPanel({ dyna }: { dyna: string }) {
               {user ? "Create lock" : "Connect wallet"}
             </ActionButton>
           )}
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+          {error && <p className="mt-3 text-sm text-danger">{error}</p>}
         </>
       )}
       <TxStatus state={state} />
@@ -197,17 +197,17 @@ function VotePanel({ epoch }: { epoch: number }) {
 
   return (
     <Panel title={`Vote · epoch ${epoch}`}>
-      {gauges?.length === 0 && <p className="text-sm text-cyan-400/60">No gauges yet.</p>}
-      <div className="mb-4 divide-y divide-cyan-400/10">
+      {gauges?.length === 0 && <p className="text-sm text-subtle">No gauges yet.</p>}
+      <div className="mb-4 divide-y divide-line">
         {gauges?.map((g) => {
           const pool = pools?.find((p) => p.address === g.pool);
           const share = total > 0n ? Number((g.votes * 10_000n) / total) / 100 : 0;
           return (
             <div key={g.pool} className="flex items-center justify-between gap-3 py-2 text-sm">
-              <span className="flex-1 text-cyan-200">
+              <span className="flex-1 text-fg">
                 {pool ? <PairLabel x={pool.tokenX} y={pool.tokenY} /> : g.pool.slice(0, 10)}
               </span>
-              <span className="w-20 text-right text-cyan-400/70">{share}%</span>
+              <span className="w-20 text-right text-muted">{share}%</span>
               <input
                 aria-label="Vote weight"
                 className={`${inputClass} w-20`}
@@ -222,7 +222,7 @@ function VotePanel({ epoch }: { epoch: number }) {
           );
         })}
       </div>
-      <p className="mb-4 text-xs text-cyan-400/60">
+      <p className="mb-4 text-xs text-subtle">
         Weights are relative (e.g. 3 and 1 = 75% / 25%). Voting again this epoch replaces your
         previous vote.
       </p>
@@ -322,7 +322,7 @@ function BribePanel({ epoch }: { epoch: number }) {
         </select>
       </Field>
       {pool && pools && (
-        <p className="-mt-2 mb-3 text-xs text-cyan-400/70">
+        <p className="-mt-2 mb-3 text-xs text-muted">
           {(() => {
             const p = pools.find((x) => x.address === pool);
             return p ? <PairLabel x={p.tokenX} y={p.tokenY} /> : null;
@@ -354,13 +354,13 @@ function BribePanel({ epoch }: { epoch: number }) {
       </ActionButton>
       <TxStatus state={add.state} />
 
-      <h3 className="mb-2 mt-6 text-sm font-semibold uppercase text-cyan-300">
+      <h3 className="mb-2 mt-6 text-sm font-semibold text-fg">
         Your claimable (epoch {epoch - 1})
       </h3>
-      {!claimable?.length && <p className="text-sm text-cyan-400/60">Nothing to claim.</p>}
+      {!claimable?.length && <p className="text-sm text-subtle">Nothing to claim.</p>}
       {claimable?.map((c) => (
         <div key={c.pool} className="mb-2 flex items-center justify-between gap-2 text-sm">
-          <span className="text-cyan-200">
+          <span className="text-fg">
             {c.items.map((i) => (
               <span key={i.token} className="mr-2">
                 <TokenAmount address={i.token} amount={i.amount} />
@@ -369,7 +369,7 @@ function BribePanel({ epoch }: { epoch: number }) {
           </span>
           <button
             type="button"
-            className="rounded border border-cyan-400/40 px-3 py-1 text-cyan-300 hover:bg-cyan-400/10"
+            className="rounded-lg border border-line px-3 py-1 text-fg hover:bg-surface-2"
             onClick={() => claim.submit("bribe", "claim_bribes", [c.pool, c.epoch])}
           >
             Claim

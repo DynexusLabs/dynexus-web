@@ -1,155 +1,88 @@
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { FaBookOpen, FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
+import { Logo } from "@/components/brand/Logo";
+import { DYNEXUS_ADDRESS, EXPLORER_ACCOUNT, NETWORK_LABEL } from "@/lib/config";
+import { shortAddr } from "@/lib/format";
+import { routes, site } from "@/lib/site";
 
-const footerLinks = {
-  product: [
-    { name: "Pools", href: "/pools" },
-    { name: "Governance", href: "/governance" },
-    { name: "Analytics", href: "/analytics" },
-    { name: "Docs", href: "/docs" },
-  ],
-  developers: [
-    { name: "API Docs", href: "/docs/api" },
-    { name: "SDK", href: "/docs/sdk" },
-    { name: "GitHub", href: "https://github.com/dynexus" },
-    { name: "Bug Bounty", href: "/bug-bounty" },
-  ],
-  community: [
-    { name: "Discord", href: "https://discord.gg/dynexus" },
-    { name: "Twitter", href: "https://twitter.com/dynexus" },
-    { name: "Forum", href: "https://forum.dynexus.fi" },
-    { name: "Blog", href: "/blog" },
-  ],
-  legal: [
-    { name: "Terms", href: "/terms" },
-    { name: "Privacy", href: "/privacy" },
-    { name: "Security", href: "/security" },
-    { name: "Brand Kit", href: "/brand" },
-  ],
-};
-
-const socialLinks = [
-  { name: "GitHub", icon: FaGithub, href: "https://github.com/dynexus" },
-  { name: "Twitter", icon: FaTwitter, href: "https://twitter.com/dynexus" },
-  { name: "Discord", icon: FaDiscord, href: "https://discord.gg/dynexus" },
-  { name: "Docs", icon: FaBookOpen, href: "/docs" },
+const developerLinks = [
+  { name: "GitHub", href: site.github },
+  { name: "Forge contracts", href: site.repos.forge },
+  { name: "Swap contracts", href: site.repos.swap },
+  { name: "Core contracts", href: site.repos.core },
+  { name: "Indexer", href: site.repos.indexer },
 ];
 
-export function Footer() {
+function External({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <footer className="border-t border-border/40 bg-background/50 backdrop-blur-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
-            {/* Brand Section */}
-            <div className="lg:col-span-2">
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-r from-primary-500 to-cyan-400">
-                  <span className="text-sm font-bold text-white">D</span>
-                </div>
-                <span className="text-xl font-bold gradient-text">Dynexus</span>
-              </Link>
-              <p className="text-muted-foreground text-sm max-w-xs mb-6">
-                The next-generation DeFi platform built on Aptos, offering advanced liquidity
-                solutions and yield optimization.
-              </p>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-fg"
+    >
+      {children}
+      <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
+    </a>
+  );
+}
 
-              {/* Social Links */}
-              <div className="flex space-x-4">
-                {socialLinks.map((social) => (
-                  <Link
-                    key={social.name}
-                    href={social.href}
-                    className="p-2 rounded-lg glass-card border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 group"
-                    aria-label={social.name}
-                  >
-                    <social.icon
-                      size={18}
-                      className="text-muted-foreground group-hover:text-primary transition-colors"
-                    />
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Product Links */}
-            <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Product</h3>
-              <ul className="space-y-3">
-                {footerLinks.product.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Developers Links */}
-            <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Developers</h3>
-              <ul className="space-y-3">
-                {footerLinks.developers.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Community Links */}
-            <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Community</h3>
-              <ul className="space-y-3">
-                {footerLinks.community.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal Links */}
-            <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Legal</h3>
-              <ul className="space-y-3">
-                {footerLinks.legal.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+export default function Footer() {
+  return (
+    <footer className="mt-16 border-t border-line bg-surface/40">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
+        <div className="md:col-span-2">
+          <Logo />
+          <p className="mt-4 max-w-sm text-sm text-muted">{site.description}</p>
+          {DYNEXUS_ADDRESS && (
+            <p className="mt-4 text-xs text-subtle">
+              Contracts on Aptos {NETWORK_LABEL}:{" "}
+              <a
+                href={EXPLORER_ACCOUNT(DYNEXUS_ADDRESS)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-muted underline-offset-2 hover:text-fg hover:underline"
+              >
+                {shortAddr(DYNEXUS_ADDRESS)}
+              </a>
+            </p>
+          )}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="py-6 border-t border-border/40">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <div className="text-sm text-muted-foreground">
-              © 2025 SciFi Finance. All rights reserved.
-            </div>
-          </div>
+        <nav aria-label="App">
+          <h2 className="text-sm font-semibold text-fg">App</h2>
+          <ul className="mt-4 space-y-2.5">
+            {routes.map((r) => (
+              <li key={r.href}>
+                <Link href={r.href} className="text-sm text-muted transition-colors hover:text-fg">
+                  {r.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-label="Developers">
+          <h2 className="text-sm font-semibold text-fg">Developers</h2>
+          <ul className="mt-4 space-y-2.5">
+            {developerLinks.map((l) => (
+              <li key={l.href}>
+                <External href={l.href}>{l.name}</External>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-subtle sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p>
+            © {new Date().getFullYear()} {site.legalName}. Open source on GitHub.
+          </p>
+          <p>
+            {NETWORK_LABEL} only · contracts are unaudited · not financial advice. Use at your own
+            risk.
+          </p>
         </div>
       </div>
     </footer>

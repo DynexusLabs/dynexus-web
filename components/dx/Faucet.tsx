@@ -21,7 +21,7 @@ export default function Faucet() {
 
   return (
     <div>
-      <p className="mb-3 text-sm text-cyan-400/80">
+      <p className="mb-3 text-sm text-muted">
         Claim{" "}
         {config && config.dyna !== "0x0" ? (
           <TokenAmount address={config.dyna} amount={config.faucetAmount} />

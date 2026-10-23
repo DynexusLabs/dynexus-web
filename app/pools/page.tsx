@@ -4,7 +4,16 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { PairLabel, TokenAmount } from "@/components/dx/Token";
 import TokenSelect from "@/components/dx/TokenSelect";
-import { ActionButton, Field, inputClass, Notice, Page, Panel, TxStatus } from "@/components/dx/ui";
+import {
+  ActionButton,
+  Field,
+  inputClass,
+  Notice,
+  Page,
+  Panel,
+  Skeleton,
+  TxStatus,
+} from "@/components/dx/ui";
 import {
   configured,
   useAccountAddress,
@@ -64,7 +73,7 @@ function CreatePool({ tokens }: { tokens: string[] }) {
           onChange={(e) => setAy(e.target.value)}
         />
       </Field>
-      <p className="mb-4 text-xs text-cyan-400/60">
+      <p className="mb-4 text-xs text-subtle">
         The amounts set the initial price. 1000 LP units stay locked in the pool forever.
       </p>
       <ActionButton
@@ -75,7 +84,7 @@ function CreatePool({ tokens }: { tokens: string[] }) {
       >
         {user ? "Create pool" : "Connect wallet"}
       </ActionButton>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
       <TxStatus state={state} />
     </Panel>
   );
@@ -84,7 +93,7 @@ function CreatePool({ tokens }: { tokens: string[] }) {
 function PoolsList() {
   const params = useSearchParams();
   const filter = params.get("token");
-  const { data: pools, isLoading } = usePools();
+  const { data: pools, isLoading, error: poolsError } = usePools();
   const { data: factoryTokens } = useTokens();
   const tokens = useMemo(
     () => [
@@ -100,40 +109,47 @@ function PoolsList() {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <Panel title="All pools" className="md:col-span-2">
-        {isLoading && <p className="text-sm text-cyan-400/60">Loading…</p>}
-        {!isLoading && rows.length === 0 && (
-          <p className="text-sm text-cyan-400/60">No pools yet — create the first one.</p>
+        {isLoading && <p className="text-sm text-subtle">Loading…</p>}
+        {poolsError && (
+          <p role="alert" className="text-sm text-danger">
+            Could not load pools: {(poolsError as Error).message}
+          </p>
+        )}
+        {pools && rows.length === 0 && (
+          <p className="text-sm text-subtle">
+            {filter ? "No pools for this token yet." : "No pools yet — create the first one."}
+          </p>
         )}
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-cyan-400/60">
+          <thead className="text-left text-xs font-medium text-subtle">
             <tr>
               <th className="py-2">Pair</th>
               <th>Reserves</th>
               <th className="hidden md:table-cell">Fee</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-cyan-400/10">
+          <tbody className="divide-y divide-line">
             {rows.map((p) => (
-              <tr key={p.address} className="hover:bg-cyan-400/5">
+              <tr key={p.address} className="hover:bg-surface-2/60">
                 <td className="py-3">
                   <Link
                     href={`/pools/${p.address}`}
-                    className="font-semibold text-cyan-200 underline-offset-4 hover:underline"
+                    className="font-semibold text-fg underline-offset-4 hover:underline"
                   >
                     <PairLabel x={p.tokenX} y={p.tokenY} />
                   </Link>
                   {p.hasGauge && (
-                    <span className="ml-2 rounded bg-teal-500/20 px-1.5 text-xs text-teal-300">
+                    <span className="ml-2 rounded-md bg-accent-2/10 px-1.5 py-0.5 text-xs font-medium text-accent-2">
                       gauge
                     </span>
                   )}
                 </td>
-                <td className="text-cyan-400/80">
+                <td className="text-muted">
                   <TokenAmount address={p.tokenX} amount={p.reserveX} />
                   <br />
                   <TokenAmount address={p.tokenY} amount={p.reserveY} />
                 </td>
-                <td className="hidden text-cyan-400/60 md:table-cell">
+                <td className="hidden text-subtle md:table-cell">
                   {(p.feeBps + p.platformFeeBps) / 100}%
                 </td>
               </tr>
@@ -153,7 +169,7 @@ export default function PoolsPage() {
       subtitle="Provide liquidity and earn swap fees; stake LP in gauges for DYNA emissions"
     >
       {!configured && <Notice>Contract address not configured.</Notice>}
-      <Suspense>
+      <Suspense fallback={<Skeleton className="h-96" />}>
         <PoolsList />
       </Suspense>
     </Page>

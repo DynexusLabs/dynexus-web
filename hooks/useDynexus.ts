@@ -7,6 +7,18 @@ import { DYNEXUS_ADDRESS } from "@/lib/config";
 
 export const configured = DYNEXUS_ADDRESS !== "";
 
+/** Indexer first when configured; on any indexer failure read the chain instead. */
+async function indexerOr<T>(fromIndexer: () => Promise<T>, fromChain: () => Promise<T>) {
+  if (indexerEnabled) {
+    try {
+      return await fromIndexer();
+    } catch (e) {
+      console.warn("Indexer unavailable, reading from chain", e);
+    }
+  }
+  return fromChain();
+}
+
 export function useAccountAddress(): string | undefined {
   const { account } = useWallet();
   return account?.address.toString();
@@ -65,30 +77,31 @@ export function useTokens(creator?: string) {
   return useQuery({
     queryKey: ["tokens", creator],
     enabled: configured,
-    queryFn: async (): Promise<TokenRow[]> => {
-      if (indexerEnabled) {
-        const rows = await api.tokens({ creator, limit: 200 });
-        return rows.map((t) => ({
-          address: t.address,
-          name: t.name ?? "",
-          symbol: t.symbol ?? "?",
-          decimals: t.decimals ?? 0,
-          creator: t.creator,
-          iconUri: t.icon_uri ?? "",
-        }));
-      }
-      const [addrs] = creator
-        ? await view<[string[]]>("token_factory", "get_tokens_by_creator", [creator])
-        : await view<[string[]]>("token_factory", "get_tokens", [0, 100]);
-      return Promise.all(
-        addrs.map(async (address) => {
-          const [c, name, symbol, decimals, , iconUri] = await view<
-            [string, string, string, number, string, string, string]
-          >("token_factory", "get_token_info", [address]);
-          return { address, name, symbol, decimals: Number(decimals), creator: c, iconUri };
-        }),
-      );
-    },
+    queryFn: (): Promise<TokenRow[]> =>
+      indexerOr(
+        async () =>
+          (await api.tokens({ creator, limit: 200 })).map((t) => ({
+            address: t.address,
+            name: t.name ?? "",
+            symbol: t.symbol ?? "?",
+            decimals: t.decimals ?? 0,
+            creator: t.creator,
+            iconUri: t.icon_uri ?? "",
+          })),
+        async () => {
+          const [addrs] = creator
+            ? await view<[string[]]>("token_factory", "get_tokens_by_creator", [creator])
+            : await view<[string[]]>("token_factory", "get_tokens", [0, 100]);
+          return Promise.all(
+            addrs.map(async (address) => {
+              const [c, name, symbol, decimals, , iconUri] = await view<
+                [string, string, string, number, string, string, string]
+              >("token_factory", "get_token_info", [address]);
+              return { address, name, symbol, decimals: Number(decimals), creator: c, iconUri };
+            }),
+          );
+        },
+      ),
   });
 }
 
@@ -109,44 +122,47 @@ export function usePools() {
   return useQuery({
     queryKey: ["pools"],
     enabled: configured,
-    queryFn: async (): Promise<PoolRow[]> => {
-      if (indexerEnabled) {
-        const rows = await api.pools({ limit: 200 });
-        return rows.map((p) => ({
-          address: p.address,
-          tokenX: p.token_x,
-          tokenY: p.token_y,
-          reserveX: BigInt(p.reserve_x),
-          reserveY: BigInt(p.reserve_y),
-          lpSupply: BigInt(p.lp_supply),
-          feeBps: p.fee_bps,
-          platformFeeBps: p.platform_fee_bps,
-          swaps24h: p.swaps_24h,
-          hasGauge: p.has_gauge,
-        }));
-      }
-      const [addrs] = await view<[string[]]>("dex", "get_pools", [0, 100]);
-      return Promise.all(
-        addrs.map(async (address) => {
-          const [[x, y], info] = await Promise.all([
-            view<[string, string, string]>("dex", "get_pool_tokens", [address]),
-            view<[string, string, string, string, string, string, string]>("dex", "get_pool_info", [
-              address,
-            ]),
-          ]);
-          return {
-            address,
-            tokenX: x,
-            tokenY: y,
-            reserveX: BigInt(info[1]),
-            reserveY: BigInt(info[2]),
-            lpSupply: BigInt(info[3]),
-            feeBps: Number(info[4]),
-            platformFeeBps: Number(info[5]),
-          };
-        }),
-      );
-    },
+    queryFn: (): Promise<PoolRow[]> =>
+      indexerOr(
+        async () =>
+          (await api.pools({ limit: 200 })).map((p) => ({
+            address: p.address,
+            tokenX: p.token_x,
+            tokenY: p.token_y,
+            reserveX: BigInt(p.reserve_x),
+            reserveY: BigInt(p.reserve_y),
+            lpSupply: BigInt(p.lp_supply),
+            feeBps: p.fee_bps,
+            platformFeeBps: p.platform_fee_bps,
+            swaps24h: p.swaps_24h,
+            hasGauge: p.has_gauge,
+          })),
+        async () => {
+          const [addrs] = await view<[string[]]>("dex", "get_pools", [0, 100]);
+          return Promise.all(
+            addrs.map(async (address) => {
+              const [[x, y], info] = await Promise.all([
+                view<[string, string, string]>("dex", "get_pool_tokens", [address]),
+                view<[string, string, string, string, string, string, string]>(
+                  "dex",
+                  "get_pool_info",
+                  [address],
+                ),
+              ]);
+              return {
+                address,
+                tokenX: x,
+                tokenY: y,
+                reserveX: BigInt(info[1]),
+                reserveY: BigInt(info[2]),
+                lpSupply: BigInt(info[3]),
+                feeBps: Number(info[4]),
+                platformFeeBps: Number(info[5]),
+              };
+            }),
+          );
+        },
+      ),
   });
 }
 

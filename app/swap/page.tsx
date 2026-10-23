@@ -5,7 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { TokenAmount, TokenSymbol } from "@/components/dx/Token";
 import TokenSelect from "@/components/dx/TokenSelect";
-import { ActionButton, Field, inputClass, Notice, Page, Panel, TxStatus } from "@/components/dx/ui";
+import {
+  ActionButton,
+  Field,
+  inputClass,
+  Notice,
+  Page,
+  Panel,
+  Skeleton,
+  TxStatus,
+} from "@/components/dx/ui";
 import {
   configured,
   useAccountAddress,
@@ -137,7 +146,7 @@ function SwapForm() {
               setTokenIn(tokenOut);
               setTokenOut(tokenIn);
             }}
-            className="rounded-full border border-cyan-400/40 p-2 text-cyan-300 hover:bg-cyan-400/10"
+            className="rounded-full border border-line p-2 text-fg hover:bg-surface-2"
           >
             <ArrowsUpDownIcon className="h-5 w-5" />
           </button>
@@ -146,45 +155,47 @@ function SwapForm() {
           <TokenSelect id="tokenOut" tokens={tokens} value={tokenOut} onChange={setTokenOut} />
         </Field>
 
-        <div className="mb-4 flex items-center gap-2 text-xs text-cyan-400/70">
+        <div className="mb-4 flex items-center gap-2 text-xs text-muted">
           Slippage
           {SLIPPAGES.map((s) => (
             <button
               type="button"
               key={s}
               onClick={() => setSlippage(s)}
-              className={`rounded px-2 py-1 ${slippage === s ? "bg-cyan-400/20 text-cyan-200" : "hover:bg-cyan-400/10"}`}
+              className={`rounded-lg px-2.5 py-1 tabular-nums ${slippage === s ? "bg-accent/15 text-fg" : "hover:bg-surface-2"}`}
             >
               {s / 100}%
             </button>
           ))}
         </div>
 
-        <div className="mb-4 space-y-1 rounded-lg bg-black/40 p-3 text-sm">
-          {tokenIn && tokenOut && !path && (
-            <p className="text-red-400">No pool or DYNA route for this pair</p>
-          )}
-          {path && path.length === 3 && (
-            <p className="text-cyan-400/70">
-              Route: <TokenSymbol address={path[0]} /> → <TokenSymbol address={path[1]} /> →{" "}
-              <TokenSymbol address={path[2]} />
-            </p>
-          )}
-          {quote.isFetching && <p className="text-cyan-400/60">Quoting…</p>}
-          {quote.error && (
-            <p className="text-red-400">Quote failed (input may exceed 10% of pool reserves)</p>
-          )}
-          {quote.data !== undefined && tokenOut && (
-            <>
-              <p className="text-cyan-200">
-                You receive ≈ <TokenAmount address={tokenOut} amount={quote.data} />
+        {tokenIn && tokenOut && (
+          <div className="mb-4 space-y-1 rounded-xl border border-line bg-surface-2/60 p-3 text-sm">
+            {tokenIn && tokenOut && !path && (
+              <p className="text-danger">No pool or DYNA route for this pair</p>
+            )}
+            {path && path.length === 3 && (
+              <p className="text-muted">
+                Route: <TokenSymbol address={path[0]} /> → <TokenSymbol address={path[1]} /> →{" "}
+                <TokenSymbol address={path[2]} />
               </p>
-              <p className="text-cyan-400/60">
-                Minimum after slippage: <TokenAmount address={tokenOut} amount={minOut} />
-              </p>
-            </>
-          )}
-        </div>
+            )}
+            {quote.isFetching && <p className="text-subtle">Quoting…</p>}
+            {quote.error && (
+              <p className="text-danger">Quote failed (input may exceed 10% of pool reserves)</p>
+            )}
+            {quote.data !== undefined && tokenOut && (
+              <>
+                <p className="text-fg">
+                  You receive ≈ <TokenAmount address={tokenOut} amount={quote.data} />
+                </p>
+                <p className="text-subtle">
+                  Minimum after slippage: <TokenAmount address={tokenOut} amount={minOut} />
+                </p>
+              </>
+            )}
+          </div>
+        )}
 
         <ActionButton
           disabled={
@@ -206,7 +217,7 @@ function SwapForm() {
                 ? "Swapping…"
                 : "Swap"}
         </ActionButton>
-        {inputError && <p className="mt-3 text-sm text-red-400">{inputError}</p>}
+        {inputError && <p className="mt-3 text-sm text-danger">{inputError}</p>}
         <TxStatus state={state} />
       </Panel>
     </div>
@@ -220,7 +231,7 @@ export default function SwapPage() {
       subtitle="Constant-product AMM · routes through DYNA when no direct pool exists"
     >
       {!configured && <Notice>Contract address not configured.</Notice>}
-      <Suspense>
+      <Suspense fallback={<Skeleton className="mx-auto h-[430px] max-w-lg" />}>
         <SwapForm />
       </Suspense>
     </Page>

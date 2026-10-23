@@ -1,174 +1,90 @@
-/* Import DM Sans or Poppins from Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap")
-  layer(base);
-
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme {
-  --font-sans: DM Sans, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  --color-primary-50: #f0f9ff;
-  --color-primary-500: #7f5af0;
-  --color-primary-600: #6d28d9;
-  --color-primary-900: #1e1b4b;
+  /* Surfaces */
+  --color-bg: #0a0b14;
+  --color-surface: #11121d;
+  --color-surface-2: #181a28;
+  --color-line: #252738;
+  --color-line-strong: #34374d;
 
-  --color-secondary-400: #00d9ff;
-  --color-secondary-500: #00bcd4;
+  /* Text */
+  --color-fg: #eceef6;
+  --color-muted: #a0a3b8;
+  --color-subtle: #7c7f96;
 
-  --color-dark-100: #1a1a2e;
-  --color-dark-200: #16213e;
-  --color-dark-300: #0f172a;
-  --color-dark-400: #0a0a1a;
+  /* Brand */
+  --color-accent: #8b6cf6;
+  --color-accent-strong: #7f5af0;
+  --color-accent-2: #00d9ff;
 
-  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
-  --background-image-gradient-conic: conic-gradient(
-    from 180deg at 50% 50%,
-    var(--tw-gradient-stops)
-  );
-  --background-image-cyber-gradient: linear-gradient(135deg, #7f5af0 0%, #00d9ff 100%);
-  --background-image-cyber-gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-
-  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-glow: glow 2s ease-in-out infinite alternate;
-
-  --backdrop-blur-xs: 2px;
-
-  @keyframes pulse-glow {
-    0%,
-    100% {
-      opacity: 1;
-      box-shadow: 0 0 20px rgba(127, 90, 240, 0.4);
-    }
-    50% {
-      opacity: 0.8;
-      box-shadow: 0 0 40px rgba(127, 90, 240, 0.8);
-    }
-  }
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  @keyframes glow {
-    0% {
-      box-shadow: 0 0 5px rgba(127, 90, 240, 0.2);
-    }
-    100% {
-      box-shadow: 0 0 20px rgba(127, 90, 240, 0.6);
-    }
-  }
+  /* Status */
+  --color-success: #34d399;
+  --color-warn: #fbbf24;
+  --color-danger: #f87171;
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    background-image:
+      radial-gradient(60rem 30rem at 15% -10%, rgb(127 90 240 / 0.14), transparent 60%),
+      radial-gradient(50rem 25rem at 95% 0%, rgb(0 217 255 / 0.08), transparent 60%);
+    background-attachment: fixed;
+    color: var(--color-fg);
+    font-feature-settings: "cv11", "ss01";
+  }
+
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-@utility glass-card {
-  @apply bg-white/10 dark:bg-dark-200/50 backdrop-blur-md border border-white/20 dark:border-gray-600/30 rounded-xl shadow-xl;
-}
-
-@utility cyber-glow {
-  box-shadow: 0 0 20px rgba(127, 90, 240, 0.3);
-
-  &:hover {
-    box-shadow: 0 0 40px rgba(127, 90, 240, 0.6);
-  }
-}
-
-@layer utilities {
-  body {
-    font-family: "DM Sans", "Poppins", "Geist", "Geist Mono", sans-serif;
-    background: linear-gradient(135deg, #181824 0%, #232347 50%, #0f0f1c 100%);
-    color: #e0e0e0;
-    transition:
-      background 0.5s,
-      color 0.5s;
+    border-color: var(--color-line);
   }
 
-  html.dark body {
-    background: linear-gradient(135deg, #181824 0%, #232347 50%, #0f0f1c 100%);
-    color: #e0e0e0;
+  :focus-visible {
+    outline: 2px solid var(--color-accent-2);
+    outline-offset: 2px;
   }
 
-  html.light body {
-    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
-    color: #232347;
+  ::selection {
+    background: rgb(127 90 240 / 0.45);
   }
 
-  .glass-card {
-    background: rgba(32, 34, 54, 0.7);
-    box-shadow:
-      0 4px 32px 0 rgba(127, 90, 240, 0.15),
-      0 1.5px 8px 0 rgba(0, 217, 255, 0.1);
-    border-radius: 1rem;
-    border: 1.5px solid rgba(127, 90, 240, 0.4);
-    backdrop-filter: blur(12px);
+  select option {
+    background-color: var(--color-surface-2);
   }
 
-  .animate-glow {
-    box-shadow:
-      0 0 16px 4px #7f5af0,
-      0 0 32px 8px #00d9ff;
-    animation: glow 2s infinite alternate;
-  }
-
-  @keyframes glow {
-    from {
-      box-shadow:
-        0 0 16px 4px #7f5af0,
-        0 0 32px 8px #00d9ff;
-    }
-    to {
-      box-shadow:
-        0 0 32px 8px #00d9ff,
-        0 0 16px 4px #7f5af0;
+  /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must override component animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
-
-  .drop-shadow-glow {
-    filter: drop-shadow(0 0 8px #7f5af0) drop-shadow(0 0 4px #00d9ff);
-  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must override component animations */
 }
 
-@layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    @apply text-gray-900 dark:text-gray-100;
-  }
+@utility text-gradient {
+  background-image: linear-gradient(90deg, #a48bff 0%, #00d9ff 100%);
+  background-clip: text;
+  color: transparent;
 }
 
-@layer components {
-  @keyframes grid-move {
-    0% {
-      transform: translate(0, 0);
-    }
-
-    100% {
-      transform: translate(50px, 50px);
-    }
-  }
+@utility bg-brand {
+  background-image: linear-gradient(135deg, #7f5af0 0%, #3b82f6 55%, #00d9ff 100%);
 }

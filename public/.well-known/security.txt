@@ -1,0 +1,9 @@
+# Report vulnerabilities privately via GitHub security advisories on the affected repository.
+Contact: https://github.com/DynexusLabs/dynexus-core/security/advisories/new
+Contact: https://github.com/DynexusLabs/dynexus-swap/security/advisories/new
+Contact: https://github.com/DynexusLabs/dynexus-forge/security/advisories/new
+Contact: https://github.com/DynexusLabs/dynexus-web/security/advisories/new
+Expires: 2027-10-23T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://dynexus.netlify.app/.well-known/security.txt
+Policy: https://github.com/DynexusLabs
