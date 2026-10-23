@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaGithub, FaTwitter, FaDiscord, FaBookOpen } from "react-icons/fa";
+import { FaBookOpen, FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
 
 const footerLinks = {
   product: [
@@ -51,8 +51,8 @@ export function Footer() {
                 <span className="text-xl font-bold gradient-text">Dynexus</span>
               </Link>
               <p className="text-muted-foreground text-sm max-w-xs mb-6">
-                The next-generation DeFi platform built on Aptos, offering
-                advanced liquidity solutions and yield optimization.
+                The next-generation DeFi platform built on Aptos, offering advanced liquidity
+                solutions and yield optimization.
               </p>
 
               {/* Social Links */}
@@ -75,9 +75,7 @@ export function Footer() {
 
             {/* Product Links */}
             <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-                Product
-              </h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Product</h3>
               <ul className="space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.name}>
@@ -94,9 +92,7 @@ export function Footer() {
 
             {/* Developers Links */}
             <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-                Developers
-              </h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Developers</h3>
               <ul className="space-y-3">
                 {footerLinks.developers.map((link) => (
                   <li key={link.name}>
@@ -113,9 +109,7 @@ export function Footer() {
 
             {/* Community Links */}
             <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-                Community
-              </h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Community</h3>
               <ul className="space-y-3">
                 {footerLinks.community.map((link) => (
                   <li key={link.name}>
@@ -132,9 +126,7 @@ export function Footer() {
 
             {/* Legal Links */}
             <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-                Legal
-              </h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Legal</h3>
               <ul className="space-y-3">
                 {footerLinks.legal.map((link) => (
                   <li key={link.name}>

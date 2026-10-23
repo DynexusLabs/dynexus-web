@@ -1,9 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
-import Header from "./Header";
-import ScanLine from "./ScanLine";
+import type { ReactNode } from "react";
 import FloatingParticles from "./FloatingParticles";
+import Header from "./Header";
 
 interface LayoutProps {
   children: ReactNode;

@@ -1,10 +1,10 @@
 "use client";
+import { useEffect, useState } from "react";
 import { Footer } from "@/components/layout/Footer";
-import React, { useState, useEffect } from "react";
 
 // Enhanced animated components
 const LiveChart = ({ height = 40 }) => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<{ x: number; y: number }[]>([]);
 
   useEffect(() => {
     const generateData = () => {
@@ -23,13 +23,11 @@ const LiveChart = ({ height = 40 }) => {
   }, [height]);
 
   const pathData = data
-    .map(
-      (point, i) => `${i === 0 ? "M" : "L"} ${point.x * 4} ${height - point.y}`
-    )
+    .map((point, i) => `${i === 0 ? "M" : "L"} ${point.x * 4} ${height - point.y}`)
     .join(" ");
 
   return (
-    <svg width="80" height={height} className="overflow-visible">
+    <svg width="80" height={height} className="overflow-visible" aria-hidden="true">
       <defs>
         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#00ffff" stopOpacity="0.8" />
@@ -43,9 +41,9 @@ const LiveChart = ({ height = 40 }) => {
         strokeWidth="2"
         className="drop-shadow-[0_0_4px_#00ffff]"
       />
-      {data.map((point, i) => (
+      {data.map((point) => (
         <circle
-          key={i}
+          key={point.x}
           cx={point.x * 4}
           cy={height - point.y}
           r="1.5"
@@ -57,7 +55,9 @@ const LiveChart = ({ height = 40 }) => {
   );
 };
 
-const StatCard = ({ title, value, color, icon }: any) => (
+type StatCardProps = { title: string; value: string; color: string; icon: string };
+
+const StatCard = ({ title, value, color, icon }: StatCardProps) => (
   <div className="relative group">
     <div
       className={`absolute inset-0 bg-gradient-to-r from-${color}-500/20 to-cyan-500/20 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-500`}
@@ -68,11 +68,7 @@ const StatCard = ({ title, value, color, icon }: any) => (
       <div className="flex flex-col items-center space-y-4">
         <div className="flex items-center space-x-2">
           <span className="text-2xl">{icon}</span>
-          <span
-            className={`text-sm uppercase tracking-widest text-${color}-400/70`}
-          >
-            {title}
-          </span>
+          <span className={`text-sm uppercase tracking-widest text-${color}-400/70`}>{title}</span>
         </div>
         <span className={`text-4xl font-bold text-${color}-400`}>{value}</span>
         <div className="w-full h-12 flex items-end justify-center">
@@ -88,7 +84,7 @@ const StatCard = ({ title, value, color, icon }: any) => (
 );
 
 export default function Home() {
-  const [activePool, setActivePool] = useState(null);
+  const [activePool, _setActivePool] = useState(null);
   const [walletConnected, setWalletConnected] = useState(false);
 
   const poolData = [
@@ -137,8 +133,7 @@ export default function Home() {
           <div
             className="w-96 h-96 border border-cyan-400/20 rotate-12 transform scale-150"
             style={{
-              clipPath:
-                "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+              clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
             }}
           ></div>
         </div>
@@ -182,12 +177,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <StatCard title="TVL" value="$123.45M" color="cyan" icon="💎" />
           <StatCard title="Pools" value="84" color="teal" icon="🌊" />
-          <StatCard
-            title="Emissions"
-            value="$567,890"
-            color="green"
-            icon="⚡"
-          />
+          <StatCard title="Emissions" value="$567,890" color="green" icon="⚡" />
         </div>
       </section>
 
@@ -199,8 +189,8 @@ export default function Home() {
             { name: "Create", icon: "⚡", desc: "New Pool" },
             { name: "Gauge", icon: "📊", desc: "Voting" },
             { name: "Lock", icon: "🔒", desc: "Stake" },
-          ].map((action, index) => (
-            <button key={action.name} className="relative group">
+          ].map((action, _index) => (
+            <button type="button" key={action.name} className="relative group">
               <div className="absolute inset-0 bg-cyan-400/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
               <div className="relative border border-cyan-400/30 bg-gray-900/70 backdrop-blur-sm rounded-xl px-6 py-6 hover:border-cyan-400 hover:bg-gray-800/80 transition-all duration-300 group-hover:scale-105">
                 <div className="flex flex-col items-center space-y-2">
@@ -208,9 +198,7 @@ export default function Home() {
                   <span className="text-cyan-400 font-medium uppercase tracking-wide text-lg">
                     {action.name}
                   </span>
-                  <span className="text-cyan-400/60 text-xs">
-                    {action.desc}
-                  </span>
+                  <span className="text-cyan-400/60 text-xs">{action.desc}</span>
                 </div>
               </div>
             </button>
@@ -221,15 +209,14 @@ export default function Home() {
       {/* Enhanced Connect Wallet */}
       <section className="relative w-full max-w-xl mx-auto px-4 py-8">
         <button
+          type="button"
           className="relative group w-full"
           onClick={() => setWalletConnected(!walletConnected)}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-75"></div>
           <div className="relative bg-gradient-to-r from-cyan-500 to-teal-500 text-black font-bold py-5 px-8 rounded-xl hover:from-cyan-400 hover:to-teal-400 transition-all duration-300 uppercase tracking-wide flex items-center justify-center space-x-3">
             <span className="text-xl">{walletConnected ? "🔗" : "🚀"}</span>
-            <span>
-              {walletConnected ? "Wallet Connected" : "Connect Wallet"}
-            </span>
+            <span>{walletConnected ? "Wallet Connected" : "Connect Wallet"}</span>
           </div>
         </button>
       </section>
@@ -241,19 +228,23 @@ export default function Home() {
           <div className="relative border border-cyan-400/30 bg-gray-900/90 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center space-x-4">
-                <h2 className="text-2xl font-bold uppercase tracking-wide text-cyan-400">
-                  /pools
-                </h2>
+                <h2 className="text-2xl font-bold uppercase tracking-wide text-cyan-400">/pools</h2>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-green-400 text-sm">Live</span>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <button className="text-sm border border-cyan-400/50 px-4 py-2 rounded-lg text-cyan-400 hover:bg-cyan-400/10 transition-colors">
+                <button
+                  type="button"
+                  className="text-sm border border-cyan-400/50 px-4 py-2 rounded-lg text-cyan-400 hover:bg-cyan-400/10 transition-colors"
+                >
                   / pos
                 </button>
-                <button className="text-sm bg-cyan-400/20 px-4 py-2 rounded-lg text-cyan-400 hover:bg-cyan-400/30 transition-colors">
+                <button
+                  type="button"
+                  className="text-sm bg-cyan-400/20 px-4 py-2 rounded-lg text-cyan-400 hover:bg-cyan-400/30 transition-colors"
+                >
                   Refresh
                 </button>
               </div>
@@ -306,30 +297,20 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-bold text-cyan-400 text-lg">
-                            {pool.pair}
-                          </span>
-                          <span className="text-cyan-400/50 text-xs">
-                            Liquidity Pool
-                          </span>
+                          <span className="font-bold text-cyan-400 text-lg">{pool.pair}</span>
+                          <span className="text-cyan-400/50 text-xs">Liquidity Pool</span>
                         </div>
                       </td>
                       <td className="py-6 text-right">
-                        <span className="text-cyan-400 font-bold text-lg">
-                          {pool.tvl}
-                        </span>
+                        <span className="text-cyan-400 font-bold text-lg">{pool.tvl}</span>
                       </td>
                       <td className="py-6 text-right">
-                        <span className="text-green-400 font-bold text-lg">
-                          {pool.apy}
-                        </span>
+                        <span className="text-green-400 font-bold text-lg">{pool.apy}</span>
                       </td>
                       <td className="py-6 text-right">
                         <span
                           className={`font-bold ${
-                            pool.change.startsWith("+")
-                              ? "text-green-400"
-                              : "text-red-400"
+                            pool.change.startsWith("+") ? "text-green-400" : "text-red-400"
                           }`}
                         >
                           {pool.change}
@@ -353,10 +334,16 @@ export default function Home() {
                     Selected: {poolData[activePool].pair}
                   </span>
                   <div className="flex space-x-2">
-                    <button className="px-4 py-2 bg-cyan-400/20 text-cyan-400 rounded-lg hover:bg-cyan-400/30 transition-colors">
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-cyan-400/20 text-cyan-400 rounded-lg hover:bg-cyan-400/30 transition-colors"
+                    >
                       Add Liquidity
                     </button>
-                    <button className="px-4 py-2 bg-green-400/20 text-green-400 rounded-lg hover:bg-green-400/30 transition-colors">
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-green-400/20 text-green-400 rounded-lg hover:bg-green-400/30 transition-colors"
+                    >
                       Stake
                     </button>
                   </div>

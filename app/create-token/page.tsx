@@ -1,19 +1,19 @@
 "use client";
-import { useState } from "react";
-import { motion } from "framer-motion";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import Card from "@/components/ui/Card";
 import {
   BeakerIcon,
   CurrencyDollarIcon,
-  PhotoIcon,
   GlobeAltIcon,
   InformationCircleIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import Card from "@/components/ui/Card";
 
 export default function CreateTokenPage() {
-  const { connected, account } = useWallet();
+  const { connected } = useWallet();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,14 +31,11 @@ export default function CreateTokenPage() {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
+    if (field.startsWith("socialLinks.")) {
+      const child = field.slice("socialLinks.".length);
       setFormData((prev) => ({
         ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as any),
-          [child]: value,
-        },
+        socialLinks: { ...prev.socialLinks, [child]: value },
       }));
     } else {
       setFormData((prev) => ({
@@ -87,8 +84,7 @@ export default function CreateTokenPage() {
           </div>
           <h1 className="text-4xl font-bold mb-4">Create Your Token</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Launch your own fungible token on the Aptos blockchain using DYN
-            tokens
+            Launch your own fungible token on the Aptos blockchain using DYN tokens
           </p>
         </motion.div>
 
@@ -102,34 +98,29 @@ export default function CreateTokenPage() {
                 {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label htmlFor="token-name" className="block text-sm font-medium mb-2">
                       Token Name *
                     </label>
                     <input
+                      id="token-name"
                       type="text"
                       placeholder="e.g., My Awesome Token"
                       value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("name", e.target.value)}
                       className="w-full input-glow"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label htmlFor="token-symbol" className="block text-sm font-medium mb-2">
                       Symbol *
                     </label>
                     <input
+                      id="token-symbol"
                       type="text"
                       placeholder="e.g., MAT"
                       value={formData.symbol}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "symbol",
-                          e.target.value.toUpperCase()
-                        )
-                      }
+                      onChange={(e) => handleInputChange("symbol", e.target.value.toUpperCase())}
                       className="w-full input-glow"
                       maxLength={10}
                     />
@@ -138,15 +129,14 @@ export default function CreateTokenPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="token-description" className="block text-sm font-medium mb-2">
                     Description
                   </label>
                   <textarea
+                    id="token-description"
                     placeholder="Describe your token and its use case..."
                     value={formData.description}
-                    onChange={(e) =>
-                      handleInputChange("description", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("description", e.target.value)}
                     className="w-full input-glow h-24 resize-none"
                   />
                 </div>
@@ -154,14 +144,13 @@ export default function CreateTokenPage() {
                 {/* Technical Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label htmlFor="token-decimals" className="block text-sm font-medium mb-2">
                       Decimals
                     </label>
                     <select
+                      id="token-decimals"
                       value={formData.decimals}
-                      onChange={(e) =>
-                        handleInputChange("decimals", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("decimals", e.target.value)}
                       className="w-full input-glow"
                     >
                       <option value="6">6</option>
@@ -172,16 +161,15 @@ export default function CreateTokenPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label htmlFor="token-supply" className="block text-sm font-medium mb-2">
                       Total Supply *
                     </label>
                     <input
+                      id="token-supply"
                       type="number"
                       placeholder="1000000"
                       value={formData.totalSupply}
-                      onChange={(e) =>
-                        handleInputChange("totalSupply", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("totalSupply", e.target.value)}
                       className="w-full input-glow"
                     />
                   </div>
@@ -189,34 +177,32 @@ export default function CreateTokenPage() {
 
                 {/* Media */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="token-logo" className="block text-sm font-medium mb-2">
                     <PhotoIcon className="inline w-4 h-4 mr-2" />
                     Logo URL
                   </label>
                   <input
+                    id="token-logo"
                     type="url"
                     placeholder="https://example.com/logo.png"
                     value={formData.logoUrl}
-                    onChange={(e) =>
-                      handleInputChange("logoUrl", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("logoUrl", e.target.value)}
                     className="w-full input-glow"
                   />
                 </div>
 
                 {/* Website */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="token-website" className="block text-sm font-medium mb-2">
                     <GlobeAltIcon className="inline w-4 h-4 mr-2" />
                     Website URL
                   </label>
                   <input
+                    id="token-website"
                     type="url"
                     placeholder="https://yourproject.com"
                     value={formData.websiteUrl}
-                    onChange={(e) =>
-                      handleInputChange("websiteUrl", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("websiteUrl", e.target.value)}
                     className="w-full input-glow"
                   />
                 </div>
@@ -229,30 +215,21 @@ export default function CreateTokenPage() {
                       type="text"
                       placeholder="Twitter username (without @)"
                       value={formData.socialLinks.twitter}
-                      onChange={(e) =>
-                        handleInputChange("socialLinks.twitter", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("socialLinks.twitter", e.target.value)}
                       className="w-full input-glow"
                     />
                     <input
                       type="text"
                       placeholder="Telegram channel/group"
                       value={formData.socialLinks.telegram}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "socialLinks.telegram",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleInputChange("socialLinks.telegram", e.target.value)}
                       className="w-full input-glow"
                     />
                     <input
                       type="text"
                       placeholder="Discord server invite"
                       value={formData.socialLinks.discord}
-                      onChange={(e) =>
-                        handleInputChange("socialLinks.discord", e.target.value)
-                      }
+                      onChange={(e) => handleInputChange("socialLinks.discord", e.target.value)}
                       className="w-full input-glow"
                     />
                   </div>
@@ -271,21 +248,15 @@ export default function CreateTokenPage() {
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Token Creation
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-300">Token Creation</span>
                   <span className="font-medium">100 DYN</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Metadata Storage
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-300">Metadata Storage</span>
                   <span className="font-medium">50 DYN</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Gas Fee
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-300">Gas Fee</span>
                   <span className="font-medium">~5 APT</span>
                 </div>
                 <hr className="border-gray-300 dark:border-gray-600" />

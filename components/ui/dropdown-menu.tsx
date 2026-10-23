@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export const DropdownMenu = ({ children }: { children: ReactNode }) => {
   return <div className="relative inline-block">{children}</div>;
@@ -51,13 +51,17 @@ export const DropdownMenuItem = ({
     role="menuitem"
     tabIndex={0}
     onClick={onClick}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick?.();
+      }
+    }}
   >
     {children}
   </div>
 );
 
-export const DropdownMenuSeparator = ({
-  className = "",
-}: {
-  className?: string;
-}) => <div className={`my-1 h-px bg-border ${className}`} />;
+export const DropdownMenuSeparator = ({ className = "" }: { className?: string }) => (
+  <div className={`my-1 h-px bg-border ${className}`} />
+);

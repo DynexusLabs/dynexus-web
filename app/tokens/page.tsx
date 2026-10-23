@@ -1,20 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import Card from "@/components/ui/Card";
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  EyeIcon,
-  PencilSquareIcon,
   ChartBarIcon,
   ClockIcon,
+  EyeIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  PencilSquareIcon,
+  PlusIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import Card from "@/components/ui/Card";
 
 interface Token {
   id: string;
@@ -81,6 +81,121 @@ const mockTokens: Token[] = [
   },
 ];
 
+const SKELETON_CARDS = ["s1", "s2", "s3", "s4", "s5", "s6"];
+const SKELETON_STATS = ["supply", "holders", "volume", "mcap"];
+
+const TokenCard = ({ token }: { token: Token }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    whileHover={{ y: -5 }}
+    className="token-card"
+  >
+    <Card className="p-6 h-full">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-400 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+            {token.logoUrl ? (
+              // biome-ignore lint/performance/noImgElement: logo URLs are arbitrary user-supplied hosts
+              <img src={token.logoUrl} alt={token.name} className="w-12 h-12 rounded-xl" />
+            ) : (
+              token.symbol.charAt(0)
+            )}
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{token.name}</h3>
+            <p className="text-gray-500 dark:text-gray-400">{token.symbol}</p>
+          </div>
+        </div>
+
+        {token.isOwned && (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-400">
+            Owned
+          </span>
+        )}
+      </div>
+
+      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+        {token.description}
+      </p>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Supply</div>
+          <div className="font-semibold">{parseInt(token.totalSupply, 10).toLocaleString()}</div>
+        </div>
+        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Holders</div>
+          <div className="font-semibold">{token.holders}</div>
+        </div>
+        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">24h Volume</div>
+          <div className="font-semibold">${token.volume24h}</div>
+        </div>
+        <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Market Cap</div>
+          <div className="font-semibold">${token.marketCap}</div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <span className="flex items-center">
+          <ClockIcon className="w-4 h-4 mr-1" />
+          {new Date(token.createdAt).toLocaleDateString()}
+        </span>
+        <span className="flex items-center">
+          <UsersIcon className="w-4 h-4 mr-1" />
+          {token.creator.slice(0, 6)}...{token.creator.slice(-4)}
+        </span>
+      </div>
+
+      <div className="flex space-x-2">
+        <Button variant="outline" size="sm" className="flex-1">
+          <EyeIcon className="w-4 h-4 mr-2" />
+          View
+        </Button>
+        <Button variant="outline" size="sm" className="flex-1">
+          <ChartBarIcon className="w-4 h-4 mr-2" />
+          Analytics
+        </Button>
+        {token.isOwned && (
+          <Button variant="ghost" size="sm">
+            <PencilSquareIcon className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+    </Card>
+  </motion.div>
+);
+
+const LoadingSkeleton = () => (
+  <div className="space-y-6">
+    {SKELETON_CARDS.map((id) => (
+      <Card key={id} className="p-6">
+        <div className="animate-pulse">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-xl" />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-24" />
+              <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-16" />
+            </div>
+          </div>
+          <div className="h-10 bg-gray-300 dark:bg-gray-600 rounded mb-4" />
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {SKELETON_STATS.map((id) => (
+              <div key={id} className="h-16 bg-gray-300 dark:bg-gray-600 rounded" />
+            ))}
+          </div>
+          <div className="flex space-x-2">
+            <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
+            <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
+          </div>
+        </div>
+      </Card>
+    ))}
+  </div>
+);
+
 export default function TokensPage() {
   const { connected, account } = useWallet();
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -109,143 +224,11 @@ export default function TokensPage() {
     return matchesSearch && matchesFilter;
   });
 
-  const TokenCard = ({ token }: { token: Token }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-      className="token-card"
-    >
-      <Card className="p-6 h-full">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-400 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              {token.logoUrl ? (
-                <img
-                  src={token.logoUrl}
-                  alt={token.name}
-                  className="w-12 h-12 rounded-xl"
-                />
-              ) : (
-                token.symbol.charAt(0)
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">{token.name}</h3>
-              <p className="text-gray-500 dark:text-gray-400">{token.symbol}</p>
-            </div>
-          </div>
-
-          {token.isOwned && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-400">
-              Owned
-            </span>
-          )}
-        </div>
-
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-          {token.description}
-        </p>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              Supply
-            </div>
-            <div className="font-semibold">
-              {parseInt(token.totalSupply).toLocaleString()}
-            </div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              Holders
-            </div>
-            <div className="font-semibold">{token.holders}</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              24h Volume
-            </div>
-            <div className="font-semibold">${token.volume24h}</div>
-          </div>
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              Market Cap
-            </div>
-            <div className="font-semibold">${token.marketCap}</div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <span className="flex items-center">
-            <ClockIcon className="w-4 h-4 mr-1" />
-            {new Date(token.createdAt).toLocaleDateString()}
-          </span>
-          <span className="flex items-center">
-            <UsersIcon className="w-4 h-4 mr-1" />
-            {token.creator.slice(0, 6)}...{token.creator.slice(-4)}
-          </span>
-        </div>
-
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            <EyeIcon className="w-4 h-4 mr-2" />
-            View
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            <ChartBarIcon className="w-4 h-4 mr-2" />
-            Analytics
-          </Button>
-          {token.isOwned && (
-            <Button variant="ghost" size="sm">
-              <PencilSquareIcon className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      </Card>
-    </motion.div>
-  );
-
-  const LoadingSkeleton = () => (
-    <div className="space-y-6">
-      {[...Array(6)].map((_, i) => (
-        <Card key={i} className="p-6">
-          <div className="animate-pulse">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-xl" />
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-24" />
-                <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-16" />
-              </div>
-            </div>
-            <div className="h-10 bg-gray-300 dark:bg-gray-600 rounded mb-4" />
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {[...Array(4)].map((_, j) => (
-                <div
-                  key={j}
-                  className="h-16 bg-gray-300 dark:bg-gray-600 rounded"
-                />
-              ))}
-            </div>
-            <div className="flex space-x-2">
-              <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
-              <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
@@ -285,9 +268,7 @@ export default function TokensPage() {
             <div className="relative">
               <select
                 value={filter}
-                onChange={(e) =>
-                  setFilter(e.target.value as "all" | "owned" | "created")
-                }
+                onChange={(e) => setFilter(e.target.value as "all" | "owned" | "created")}
                 className="appearance-none bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-4 pr-10 py-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors cursor-pointer"
               >
                 <option value="all">All Tokens</option>

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { PropsWithChildren } from "react";
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { Network } from "@aptos-labs/ts-sdk";
+import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import type { PropsWithChildren } from "react";
 
 const WalletProvider = ({ children }: PropsWithChildren) => {
   return (

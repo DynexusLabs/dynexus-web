@@ -1,4 +1,5 @@
-import React, { ReactNode } from "react";
+import type React from "react";
+import type { ReactNode } from "react";
 
 interface DialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, children }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-background rounded-lg shadow-lg p-6 relative min-w-[300px]">
         <button
+          type="button"
           className="absolute top-2 right-2 text-muted-foreground hover:text-primary"
           onClick={onClose}
           aria-label="Close dialog"
@@ -31,11 +33,7 @@ export const DialogContent = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <div
-    className={`relative bg-background rounded-lg shadow-lg p-6 ${className}`}
-  >
-    {children}
-  </div>
+  <div className={`relative bg-background rounded-lg shadow-lg p-6 ${className}`}>{children}</div>
 );
 
 export const DialogHeader = ({ children }: { children: React.ReactNode }) => (

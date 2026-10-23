@@ -31,11 +31,9 @@ module.exports = {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
         "cyber-gradient": "linear-gradient(135deg, #7f5af0 0%, #00d9ff 100%)",
-        "cyber-gradient-dark":
-          "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+        "cyber-gradient-dark": "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
       },
       animation: {
         "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",

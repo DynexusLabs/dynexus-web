@@ -1,15 +1,17 @@
+/* Import DM Sans or Poppins from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import DM Sans or Poppins from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap');
-
 body {
-  font-family: 'DM Sans', 'Poppins', 'Geist', 'Geist Mono', 'sans-serif';
+  font-family: "DM Sans", "Poppins", "Geist", "Geist Mono", sans-serif;
   background: linear-gradient(135deg, #181824 0%, #232347 50%, #0f0f1c 100%);
   color: #e0e0e0;
-  transition: background 0.5s, color 0.5s;
+  transition:
+    background 0.5s,
+    color 0.5s;
 }
 
 html.dark body {
@@ -24,23 +26,31 @@ html.light body {
 
 .glass-card {
   background: rgba(32, 34, 54, 0.7);
-  box-shadow: 0 4px 32px 0 rgba(127, 90, 240, 0.15), 0 1.5px 8px 0 rgba(0, 217, 255, 0.10);
+  box-shadow:
+    0 4px 32px 0 rgba(127, 90, 240, 0.15),
+    0 1.5px 8px 0 rgba(0, 217, 255, 0.1);
   border-radius: 1rem;
   border: 1.5px solid rgba(127, 90, 240, 0.4);
   backdrop-filter: blur(12px);
 }
 
 .animate-glow {
-  box-shadow: 0 0 16px 4px #7f5af0, 0 0 32px 8px #00d9ff;
+  box-shadow:
+    0 0 16px 4px #7f5af0,
+    0 0 32px 8px #00d9ff;
   animation: glow 2s infinite alternate;
 }
 
 @keyframes glow {
   from {
-    box-shadow: 0 0 16px 4px #7f5af0, 0 0 32px 8px #00d9ff;
+    box-shadow:
+      0 0 16px 4px #7f5af0,
+      0 0 32px 8px #00d9ff;
   }
   to {
-    box-shadow: 0 0 32px 8px #00d9ff, 0 0 16px 4px #7f5af0;
+    box-shadow:
+      0 0 32px 8px #00d9ff,
+      0 0 16px 4px #7f5af0;
   }
 }
 
@@ -71,13 +81,13 @@ html.light body {
     box-shadow: 0 0 40px rgba(127, 90, 240, 0.6);
   }
 
-         @keyframes grid-move {
-           0% {
-             transform: translate(0, 0);
-           }
-    
-           100% {
-             transform: translate(50px, 50px);
-           }
-         }
+  @keyframes grid-move {
+    0% {
+      transform: translate(0, 0);
+    }
+
+    100% {
+      transform: translate(50px, 50px);
+    }
+  }
 }

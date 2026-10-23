@@ -1,16 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { Bars3Icon, MoonIcon, SunIcon, WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { motion } from "framer-motion";
-import {
-  SunIcon,
-  MoonIcon,
-  Bars3Icon,
-  XMarkIcon,
-  WalletIcon,
-} from "@heroicons/react/24/outline";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 
 const navigation = [
@@ -64,14 +58,11 @@ export default function Header() {
         <div className="flex items-center space-x-4">
           {/* Theme toggle */}
           <button
+            type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 text-cyan-400 hover:text-[#7f5af0] transition-colors"
           >
-            {theme === "dark" ? (
-              <SunIcon className="h-5 w-5" />
-            ) : (
-              <MoonIcon className="h-5 w-5" />
-            )}
+            {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
 
           {/* Wallet connection */}
@@ -90,14 +81,11 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 text-cyan-400 hover:text-[#7f5af0]"
           >
-            {mobileMenuOpen ? (
-              <XMarkIcon className="h-6 w-6" />
-            ) : (
-              <Bars3Icon className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
           </button>
         </div>
       </nav>
