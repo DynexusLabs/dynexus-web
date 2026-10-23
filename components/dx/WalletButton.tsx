@@ -1,6 +1,7 @@
 "use client";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
+  ArrowPathIcon,
   ArrowRightStartOnRectangleIcon,
   ArrowTopRightOnSquareIcon,
   CheckIcon,
@@ -9,7 +10,8 @@ import {
   WalletIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EXPLORER_ACCOUNT, NETWORK, NETWORK_LABEL } from "@/lib/config";
+import { useNetworkSwitch } from "@/hooks/useNetworkSwitch";
+import { EXPLORER_ACCOUNT, NETWORK_LABEL } from "@/lib/config";
 import { shortAddr } from "@/lib/format";
 
 const menuItem =
@@ -42,8 +44,7 @@ export default function WalletButton() {
   const close = useCallback(() => setOpen(false), []);
   const ref = useDismiss(open, close);
   const address = account?.address.toString();
-  const wrongNetwork =
-    connected && network && network.name.toLowerCase() !== String(NETWORK).toLowerCase();
+  const { wrongNetwork, canSwitch, switching, switchNetwork } = useNetworkSwitch();
 
   const copy = async () => {
     if (!address) return;
@@ -101,6 +102,18 @@ export default function WalletButton() {
             </p>
             <p className="mt-0.5 break-all font-mono text-xs text-muted">{address}</p>
           </div>
+          {wrongNetwork && canSwitch && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={switchNetwork}
+              disabled={switching}
+              className={`${menuItem} text-danger disabled:opacity-60`}
+            >
+              <ArrowPathIcon className="h-4 w-4" />
+              {switching ? "Check your wallet…" : `Switch to ${NETWORK_LABEL}`}
+            </button>
+          )}
           <button type="button" role="menuitem" onClick={copy} className={menuItem}>
             {copied ? (
               <CheckIcon className="h-4 w-4 text-success" />
