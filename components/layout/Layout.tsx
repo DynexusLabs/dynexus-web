@@ -1,9 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
-import Header from "./Header";
-import ScanLine from "./ScanLine";
+import type { ReactNode } from "react";
 import FloatingParticles from "./FloatingParticles";
+import Header from "./Header";
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Scanning line effect */}
       <div className="fixed inset-0 pointer-events-none">
         <div
-          className="absolute w-full h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-pulse"
+          className="absolute w-full h-px bg-linear-to-r from-transparent via-cyan-400/50 to-transparent animate-pulse"
           style={{
             top: "30%",
             animation: "scan-line 4s ease-in-out infinite alternate",

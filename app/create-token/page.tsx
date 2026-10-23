@@ -1,346 +1,178 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import Card from "@/components/ui/Card";
-import {
-  BeakerIcon,
-  CurrencyDollarIcon,
-  PhotoIcon,
-  GlobeAltIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { Button } from "@/components/ui/button";
+import Faucet from "@/components/dx/Faucet";
+import { TokenAmount } from "@/components/dx/Token";
+import { ActionButton, Field, inputClass, Notice, Page, Panel, TxStatus } from "@/components/dx/ui";
+import { configured, useAccountAddress, useBalance, useForgeConfig } from "@/hooks/useDynexus";
+import { useTx } from "@/hooks/useTx";
+import { toUnits } from "@/lib/format";
+
+const MAX_URI = 512;
 
 export default function CreateTokenPage() {
-  const { connected, account } = useWallet();
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const user = useAccountAddress();
+  const { data: config } = useForgeConfig();
+  const { data: dynaBalance } = useBalance(config?.dyna);
+  const { submit, state } = useTx();
+  const [form, setForm] = useState({
     name: "",
     symbol: "",
-    description: "",
     decimals: "8",
-    totalSupply: "",
-    logoUrl: "",
-    websiteUrl: "",
-    socialLinks: {
-      twitter: "",
-      telegram: "",
-      discord: "",
-    },
+    supply: "",
+    icon: "",
+    website: "",
   });
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const handleInputChange = (field: string, value: string) => {
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as any),
-          [child]: value,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
-  };
+  const isAdmin = !!user && !!config && user === config.admin;
+  const fee = config?.fee ?? 0n;
+  const canPay = isAdmin || fee === 0n || (dynaBalance ?? 0n) >= fee;
 
-  const handleCreateToken = async () => {
-    if (!connected) {
-      alert("Please connect your wallet first");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // TODO: Implement token creation logic with Aptos SDK
-      console.log("Creating token with data:", formData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      alert("Token created successfully!");
-    } catch (error) {
-      console.error("Error creating token:", error);
-      alert("Failed to create token");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const isFormValid = formData.name && formData.symbol && formData.totalSupply;
+  let error = "";
+  let supplyUnits = 0n;
+  try {
+    if (!form.name.trim() || !form.symbol.trim()) error = "Name and symbol are required";
+    else if (form.name.length > 32 || form.symbol.length > 32)
+      error = "Name and symbol: max 32 characters";
+    else if (form.icon.length > MAX_URI || form.website.length > MAX_URI)
+      error = "URLs: max 512 characters";
+    else if (form.supply) supplyUnits = toUnits(form.supply, Number(form.decimals));
+    if (supplyUnits > 18446744073709551615n) error = "Supply exceeds u64";
+  } catch (e) {
+    error = (e as Error).message;
+  }
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl mb-6">
-            <BeakerIcon className="w-8 h-8 text-white" />
+    <Page
+      title="Forge a token"
+      subtitle="Launch a fungible asset on Aptos. You keep mint authority."
+    >
+      {!configured && <Notice>Contract address not configured.</Notice>}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Panel title="Token details" className="md:col-span-2">
+          <div className="grid gap-x-4 md:grid-cols-2">
+            <Field id="name" label="Name">
+              <input
+                id="name"
+                className={inputClass}
+                value={form.name}
+                onChange={set("name")}
+                maxLength={32}
+                placeholder="My Token"
+              />
+            </Field>
+            <Field id="symbol" label="Symbol">
+              <input
+                id="symbol"
+                className={inputClass}
+                value={form.symbol}
+                onChange={(e) => setForm((f) => ({ ...f, symbol: e.target.value.toUpperCase() }))}
+                maxLength={32}
+                placeholder="MTK"
+              />
+            </Field>
+            <Field id="decimals" label="Decimals">
+              <select
+                id="decimals"
+                className={inputClass}
+                value={form.decimals}
+                onChange={set("decimals")}
+              >
+                {[0, 2, 4, 6, 8].map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field id="supply" label="Initial supply" hint="minted to you">
+              <input
+                id="supply"
+                className={inputClass}
+                value={form.supply}
+                onChange={set("supply")}
+                inputMode="decimal"
+                placeholder="1000000"
+              />
+            </Field>
           </div>
-          <h1 className="text-4xl font-bold mb-4">Create Your Token</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Launch your own fungible token on the Aptos blockchain using DYN
-            tokens
-          </p>
-        </motion.div>
+          <Field id="icon" label="Icon URL">
+            <input
+              id="icon"
+              className={inputClass}
+              value={form.icon}
+              onChange={set("icon")}
+              placeholder="https://…/logo.png"
+            />
+          </Field>
+          <Field id="website" label="Project URL">
+            <input
+              id="website"
+              className={inputClass}
+              value={form.website}
+              onChange={set("website")}
+              placeholder="https://…"
+            />
+          </Field>
+        </Panel>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
-            <Card>
-              <h2 className="text-2xl font-semibold mb-6">Token Details</h2>
-
-              <div className="space-y-6">
-                {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Token Name *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., My Awesome Token"
-                      value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
-                      className="w-full input-glow"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Symbol *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., MAT"
-                      value={formData.symbol}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "symbol",
-                          e.target.value.toUpperCase()
-                        )
-                      }
-                      className="w-full input-glow"
-                      maxLength={10}
-                    />
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Describe your token and its use case..."
-                    value={formData.description}
-                    onChange={(e) =>
-                      handleInputChange("description", e.target.value)
-                    }
-                    className="w-full input-glow h-24 resize-none"
-                  />
-                </div>
-
-                {/* Technical Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Decimals
-                    </label>
-                    <select
-                      value={formData.decimals}
-                      onChange={(e) =>
-                        handleInputChange("decimals", e.target.value)
-                      }
-                      className="w-full input-glow"
-                    >
-                      <option value="6">6</option>
-                      <option value="8">8</option>
-                      <option value="9">9</option>
-                      <option value="18">18</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Total Supply *
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="1000000"
-                      value={formData.totalSupply}
-                      onChange={(e) =>
-                        handleInputChange("totalSupply", e.target.value)
-                      }
-                      className="w-full input-glow"
-                    />
-                  </div>
-                </div>
-
-                {/* Media */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <PhotoIcon className="inline w-4 h-4 mr-2" />
-                    Logo URL
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://example.com/logo.png"
-                    value={formData.logoUrl}
-                    onChange={(e) =>
-                      handleInputChange("logoUrl", e.target.value)
-                    }
-                    className="w-full input-glow"
-                  />
-                </div>
-
-                {/* Website */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <GlobeAltIcon className="inline w-4 h-4 mr-2" />
-                    Website URL
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://yourproject.com"
-                    value={formData.websiteUrl}
-                    onChange={(e) =>
-                      handleInputChange("websiteUrl", e.target.value)
-                    }
-                    className="w-full input-glow"
-                  />
-                </div>
-
-                {/* Social Links */}
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Social Links</h3>
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      placeholder="Twitter username (without @)"
-                      value={formData.socialLinks.twitter}
-                      onChange={(e) =>
-                        handleInputChange("socialLinks.twitter", e.target.value)
-                      }
-                      className="w-full input-glow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Telegram channel/group"
-                      value={formData.socialLinks.telegram}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "socialLinks.telegram",
-                          e.target.value
-                        )
-                      }
-                      className="w-full input-glow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Discord server invite"
-                      value={formData.socialLinks.discord}
-                      onChange={(e) =>
-                        handleInputChange("socialLinks.discord", e.target.value)
-                      }
-                      className="w-full input-glow"
-                    />
-                  </div>
-                </div>
+        <div className="space-y-6">
+          <Panel title="Cost">
+            <div className="flex justify-between text-sm">
+              <span className="text-cyan-400/70">Creation fee</span>
+              <span className="text-cyan-200">
+                {isAdmin ? (
+                  "waived (admin)"
+                ) : config ? (
+                  <TokenAmount address={config.dyna} amount={fee} />
+                ) : (
+                  "…"
+                )}
+              </span>
+            </div>
+            {config && user && (
+              <div className="mt-2 flex justify-between text-sm">
+                <span className="text-cyan-400/70">Your DYNA</span>
+                <span className={canPay ? "text-cyan-200" : "text-red-400"}>
+                  <TokenAmount address={config.dyna} amount={dynaBalance ?? 0n} />
+                </span>
               </div>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Cost Breakdown */}
-            <Card>
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <CurrencyDollarIcon className="w-5 h-5 mr-2" />
-                Cost Breakdown
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Token Creation
-                  </span>
-                  <span className="font-medium">100 DYN</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Metadata Storage
-                  </span>
-                  <span className="font-medium">50 DYN</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Gas Fee
-                  </span>
-                  <span className="font-medium">~5 APT</span>
-                </div>
-                <hr className="border-gray-300 dark:border-gray-600" />
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span className="gradient-text">150 DYN + ~5 APT</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Requirements */}
-            <Card>
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <InformationCircleIcon className="w-5 h-5 mr-2" />
-                Requirements
-              </h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center">
-                  <div
-                    className={`w-2 h-2 rounded-full mr-3 ${
-                      connected ? "bg-green-500" : "bg-gray-400"
-                    }`}
-                  />
-                  Wallet Connected
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3" />
-                  150 DYN Balance
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3" />
-                  5+ APT for Gas
-                </li>
-              </ul>
-            </Card>
-
-            {/* Create Button */}
-            <Button
-              onClick={handleCreateToken}
-              disabled={!connected || !isFormValid || loading}
-              // loading={loading}
-              className="w-full"
-              size="lg"
-            >
-              {loading ? "Creating Token..." : "Create Token"}
-            </Button>
-
-            {!connected && (
-              <p className="text-sm text-center text-gray-500">
-                Connect your wallet to create tokens
-              </p>
             )}
-          </div>
+            <div className="mt-6">
+              <ActionButton
+                disabled={!user || !!error || !canPay || state.status === "pending"}
+                onClick={() =>
+                  submit("token_factory", "create_token", [
+                    form.name.trim(),
+                    form.symbol.trim(),
+                    Number(form.decimals),
+                    supplyUnits.toString(),
+                    form.icon.trim(),
+                    form.website.trim(),
+                  ])
+                }
+              >
+                {!user
+                  ? "Connect wallet"
+                  : state.status === "pending"
+                    ? "Creating…"
+                    : "Create token"}
+              </ActionButton>
+              {user && error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+              {user && !error && !canPay && (
+                <p className="mt-3 text-sm text-red-400">Not enough DYNA for the fee</p>
+              )}
+              <TxStatus state={state} />
+            </div>
+          </Panel>
+          {!canPay && (
+            <Panel title="Need DYNA?">
+              <Faucet />
+            </Panel>
+          )}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

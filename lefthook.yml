@@ -1,0 +1,38 @@
+# Git hooks — installed by `bun install` (prepare script). Docs: https://lefthook.dev
+pre-commit:
+  piped: true
+  commands:
+    env-guard:
+      priority: 1
+      run: sh scripts/guard-env.sh {staged_files}
+    secretlint:
+      priority: 2
+      run: bunx secretlint --maskSecrets {staged_files}
+    biome:
+      priority: 3
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css}"
+      run: bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    prettier:
+      priority: 4
+      glob: "*.{md,yml,yaml}"
+      run: bunx prettier --write {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
+
+pre-push:
+  piped: true
+  commands:
+    secretlint:
+      priority: 1
+      run: bunx secretlint --maskSecrets "**/*"
+    check:
+      priority: 2
+      run: bun run lint && bun run typecheck
+    build:
+      priority: 3
+      run: bun run build
