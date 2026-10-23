@@ -18,8 +18,16 @@ export const INDEXER_URL = (process.env.NEXT_PUBLIC_INDEXER_URL ?? "").replace(/
 
 export const APTOS_API_KEY = process.env.NEXT_PUBLIC_APTOS_API_KEY || undefined;
 
+const explorerNetwork = NETWORK === Network.LOCAL ? "local" : NETWORK;
+
 export const EXPLORER_TX = (hash: string) =>
-  `https://explorer.aptoslabs.com/txn/${hash}?network=${NETWORK === Network.LOCAL ? "local" : NETWORK}`;
+  `https://explorer.aptoslabs.com/txn/${hash}?network=${explorerNetwork}`;
+
+export const EXPLORER_ACCOUNT = (address: string) =>
+  `https://explorer.aptoslabs.com/account/${address}?network=${explorerNetwork}`;
+
+/** Human label for the configured network, e.g. "Testnet". */
+export const NETWORK_LABEL = String(NETWORK).charAt(0).toUpperCase() + String(NETWORK).slice(1);
 
 export const fn = (module: string, name: string) =>
   `${DYNEXUS_ADDRESS}::${module}::${name}` as `${string}::${string}::${string}`;

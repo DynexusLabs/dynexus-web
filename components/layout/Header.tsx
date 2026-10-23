@@ -2,58 +2,71 @@
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Logo } from "@/components/brand/Logo";
 import WalletButton from "@/components/dx/WalletButton";
-
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Tokens", href: "/tokens" },
-  { name: "Create", href: "/create-token" },
-  { name: "Swap", href: "/swap" },
-  { name: "Pools", href: "/pools" },
-  { name: "Governance", href: "/governance" },
-];
+import { NETWORK, NETWORK_LABEL } from "@/lib/config";
+import { routes } from "@/lib/site";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: close the menu on every navigation
+  useEffect(() => setMobileMenuOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileMenuOpen]);
 
   return (
-    <header className="relative z-40 w-full border-b-2 border-cyan-400/30 bg-black px-4 py-4 shadow-[0_0_32px_#00d9ff80] md:px-8">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-[#7f5af0] to-[#00d9ff] shadow-[0_0_8px_#00d9ff80]">
-            <span className="text-sm font-bold text-white">D</span>
-          </div>
-          <span className="bg-gradient-to-r from-[#7f5af0] via-[#00d9ff] to-[#ff6bcb] bg-clip-text text-xl font-bold uppercase tracking-widest text-transparent">
-            Dynexus
-          </span>
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/75 backdrop-blur-xl">
+      <nav
+        aria-label="Main"
+        className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
+      >
+        <Link href="/" aria-label="Dynexus home" className="shrink-0">
+          <Logo />
         </Link>
 
-        <div className="hidden items-center space-x-2 md:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
-                isActive(item.href)
-                  ? "bg-cyan-400/15 text-cyan-200"
-                  : "text-cyan-400 hover:bg-cyan-400/10"
-              }`}
-            >
-              {item.name}
-            </Link>
+        <ul className="hidden items-center gap-1 lg:flex">
+          {routes.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? "bg-surface-2 text-fg"
+                    : "text-muted hover:bg-surface-2/60 hover:text-fg"
+                }`}
+              >
+                {item.name}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2">
+          <span
+            title={`Connected to Aptos ${NETWORK}`}
+            className="hidden items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-xs font-medium text-muted sm:inline-flex"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+            {NETWORK_LABEL}
+          </span>
           <WalletButton />
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-cyan-400 md:hidden"
-            aria-label="Toggle menu"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-fg lg:hidden"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav"
           >
             {mobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
           </button>
@@ -61,18 +74,21 @@ export default function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="mt-4 flex flex-col space-y-1 md:hidden">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="rounded px-3 py-2 text-sm font-semibold uppercase text-cyan-400 hover:bg-cyan-400/10"
-            >
-              {item.name}
-            </Link>
+        <ul id="mobile-nav" className="border-t border-line px-4 py-3 lg:hidden">
+          {routes.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium ${
+                  isActive(item.href) ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface-2"
+                }`}
+              >
+                {item.name}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </header>
   );

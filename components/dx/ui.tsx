@@ -13,9 +13,15 @@ export function Page({
   children: ReactNode;
 }) {
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-4 py-10">
-      <h1 className="mb-2 text-3xl font-bold uppercase tracking-widest text-cyan-300">{title}</h1>
-      {subtitle && <p className="mb-8 text-sm text-cyan-400/70">{subtitle}</p>}
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <header className="mb-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">{title}</h1>
+        {subtitle && (
+          <p className="mt-2 max-w-2xl wrap-break-word text-sm text-muted sm:text-base">
+            {subtitle}
+          </p>
+        )}
+      </header>
       {children}
     </div>
   );
@@ -32,13 +38,9 @@ export function Panel({
 }) {
   return (
     <section
-      className={`rounded-xl border border-cyan-400/30 bg-gray-900/80 p-6 backdrop-blur-sm ${className}`}
+      className={`rounded-2xl border border-line bg-surface/80 p-5 shadow-[0_1px_0_0_rgb(255_255_255/0.03)_inset] backdrop-blur-sm sm:p-6 ${className}`}
     >
-      {title && (
-        <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-cyan-300">
-          {title}
-        </h2>
-      )}
+      {title && <h2 className="mb-4 text-base font-semibold text-fg">{title}</h2>}
       {children}
     </section>
   );
@@ -58,10 +60,10 @@ export function Field({
   return (
     <div className="mb-4">
       <div className="mb-1 flex items-baseline justify-between">
-        <label htmlFor={id} className="text-xs uppercase tracking-wide text-cyan-400/80">
+        <label htmlFor={id} className="text-xs font-medium text-muted">
           {label}
         </label>
-        {hint && <span className="text-xs text-cyan-400/60">{hint}</span>}
+        {hint && <span className="text-xs tabular-nums text-subtle">{hint}</span>}
       </div>
       {children}
     </div>
@@ -69,7 +71,7 @@ export function Field({
 }
 
 export const inputClass =
-  "w-full rounded-lg border border-cyan-400/30 bg-black/60 px-3 py-2 text-cyan-100 placeholder-cyan-700 outline-hidden focus:border-cyan-300";
+  "w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-fg tabular-nums placeholder:text-subtle outline-hidden transition-colors hover:border-line-strong focus:border-accent focus-visible:outline-none disabled:opacity-50";
 
 export function ActionButton({
   children,
@@ -84,14 +86,14 @@ export function ActionButton({
 }) {
   const style =
     variant === "primary"
-      ? "bg-linear-to-r from-cyan-500 to-teal-500 text-black hover:from-cyan-400 hover:to-teal-400"
-      : "border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10";
+      ? "bg-accent-strong text-white shadow-lg shadow-accent-strong/20 hover:bg-accent"
+      : "border border-line-strong text-fg hover:bg-surface-2";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-full rounded-lg px-4 py-3 font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 ${style}`}
+      className={`w-full rounded-xl px-4 py-3 font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none ${style}`}
     >
       {children}
     </button>
@@ -101,13 +103,26 @@ export function ActionButton({
 export function TxStatus({ state }: { state: TxState }) {
   if (state.status === "idle") return null;
   if (state.status === "pending")
-    return <p className="mt-3 text-sm text-yellow-300">Waiting for confirmation…</p>;
+    return (
+      <p role="status" className="mt-3 text-sm text-warn">
+        Waiting for wallet and network confirmation…
+      </p>
+    );
   if (state.status === "error")
-    return <p className="mt-3 wrap-break-word text-sm text-red-400">{state.message}</p>;
+    return (
+      <p role="alert" className="mt-3 wrap-break-word text-sm text-danger">
+        {state.message}
+      </p>
+    );
   return (
-    <p className="mt-3 text-sm text-green-400">
+    <p role="status" className="mt-3 text-sm text-success">
       Confirmed —{" "}
-      <a href={EXPLORER_TX(state.hash)} target="_blank" rel="noreferrer" className="underline">
+      <a
+        href={EXPLORER_TX(state.hash)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2"
+      >
         view transaction
       </a>
     </p>
@@ -116,16 +131,21 @@ export function TxStatus({ state }: { state: TxState }) {
 
 export function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-xl border border-cyan-400/30 bg-gray-900/80 p-4">
-      <div className="text-xs uppercase tracking-wide text-cyan-400/70">{label}</div>
-      <div className="mt-1 text-2xl font-bold text-cyan-200">{value}</div>
+    <div className="rounded-2xl border border-line bg-surface/80 p-4 sm:p-5">
+      <div className="text-xs font-medium text-muted">{label}</div>
+      <div className="mt-1.5 truncate text-xl font-semibold tabular-nums text-fg sm:text-2xl">
+        {value}
+      </div>
     </div>
   );
 }
 
 export function Notice({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-6 rounded-lg border border-yellow-400/40 bg-yellow-400/10 p-4 text-sm text-yellow-200">
+    <div
+      role="note"
+      className="mb-6 rounded-xl border border-warn/30 bg-warn/10 p-4 text-sm text-warn"
+    >
       {children}
     </div>
   );
@@ -134,7 +154,7 @@ export function Notice({ children }: { children: ReactNode }) {
 /** Minimal dependency-free line chart for candle closes. */
 export function Sparkline({ values, height = 120 }: { values: number[]; height?: number }) {
   if (values.length < 2)
-    return <p className="text-sm text-cyan-400/60">Not enough swaps to chart yet.</p>;
+    return <p className="text-sm text-subtle">Not enough swaps to chart yet.</p>;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
@@ -148,7 +168,24 @@ export function Sparkline({ values, height = 120 }: { values: number[]; height?:
   return (
     <svg viewBox={`0 0 ${w} ${height}`} className="h-32 w-full" role="img" aria-label="Price chart">
       <title>Price chart</title>
-      <polyline points={points} fill="none" stroke="#22d3ee" strokeWidth="2" />
+      <polyline
+        points={points}
+        fill="none"
+        stroke="#00d9ff"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
+  );
+}
+
+/** Fixed-height placeholder so Suspense fallbacks do not shift the layout on hydration. */
+export function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`animate-pulse rounded-2xl border border-line bg-surface/80 ${className}`}
+    />
   );
 }

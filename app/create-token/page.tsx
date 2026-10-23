@@ -120,8 +120,8 @@ export default function CreateTokenPage() {
         <div className="space-y-6">
           <Panel title="Cost">
             <div className="flex justify-between text-sm">
-              <span className="text-cyan-400/70">Creation fee</span>
-              <span className="text-cyan-200">
+              <span className="text-muted">Creation fee</span>
+              <span className="text-fg">
                 {isAdmin ? (
                   "waived (admin)"
                 ) : config ? (
@@ -133,8 +133,8 @@ export default function CreateTokenPage() {
             </div>
             {config && user && (
               <div className="mt-2 flex justify-between text-sm">
-                <span className="text-cyan-400/70">Your DYNA</span>
-                <span className={canPay ? "text-cyan-200" : "text-red-400"}>
+                <span className="text-muted">Your DYNA</span>
+                <span className={canPay ? "text-fg" : "text-danger"}>
                   <TokenAmount address={config.dyna} amount={dynaBalance ?? 0n} />
                 </span>
               </div>
@@ -159,9 +159,9 @@ export default function CreateTokenPage() {
                     ? "Creating…"
                     : "Create token"}
               </ActionButton>
-              {user && error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+              {user && error && <p className="mt-3 text-sm text-danger">{error}</p>}
               {user && !error && !canPay && (
-                <p className="mt-3 text-sm text-red-400">Not enough DYNA for the fee</p>
+                <p className="mt-3 text-sm text-danger">Not enough DYNA for the fee</p>
               )}
               <TxStatus state={state} />
             </div>

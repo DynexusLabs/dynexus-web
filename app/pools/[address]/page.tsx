@@ -57,7 +57,7 @@ function AddLiquidity({ x, y, rx, ry }: { x: string; y: string; rx: bigint; ry: 
           onChange={(e) => setAmountX(e.target.value)}
         />
       </Field>
-      <p className="mb-4 text-sm text-cyan-400/70">
+      <p className="mb-4 text-sm text-muted">
         Requires ≈ {my ? <TokenAmount address={y} amount={uy} /> : "…"}
       </p>
       <ActionButton
@@ -76,7 +76,7 @@ function AddLiquidity({ x, y, rx, ry }: { x: string; y: string; rx: bigint; ry: 
       >
         {user ? "Add liquidity" : "Connect wallet"}
       </ActionButton>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
       <TxStatus state={state} />
     </Panel>
   );
@@ -102,7 +102,7 @@ function RemoveLiquidity({ pool, x, y, lp }: { pool: string; x: string; y: strin
   // calculate_lp_value returns pool order (sorted), which matches x/y here.
   return (
     <Panel title="Remove liquidity">
-      <p className="mb-2 text-sm text-cyan-400/70">
+      <p className="mb-2 text-sm text-muted">
         Your LP: {lpBal !== undefined ? lpBal.toString() : "…"} units
       </p>
       <input
@@ -114,7 +114,7 @@ function RemoveLiquidity({ pool, x, y, lp }: { pool: string; x: string; y: strin
         onChange={(e) => setPct(Number(e.target.value))}
         className="w-full"
       />
-      <p className="mb-4 text-sm text-cyan-300">
+      <p className="mb-4 text-sm text-fg">
         {pct}% →{" "}
         {value ? (
           <>
@@ -177,14 +177,14 @@ function GaugeStake({ pool, lp }: { pool: string; lp: string }) {
   if (!data) return null;
   return (
     <Panel title="Gauge">
-      <div className="mb-4 space-y-1 text-sm text-cyan-400/80">
+      <div className="mb-4 space-y-1 text-sm text-muted">
         <p>Total staked: {data.total.toString()} LP</p>
         <p>Your stake: {data.staked.toString()} LP</p>
         <p>
           Emission rate: {dyna ? <TokenAmount address={dyna} amount={data.rate * 86400n} /> : "…"} /
           day
         </p>
-        <p className="text-cyan-200">
+        <p className="text-fg">
           Earned: {dyna ? <TokenAmount address={dyna} amount={data.earned} /> : "…"}
         </p>
       </div>
@@ -237,7 +237,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
   if (!pool) {
     return (
       <Page title="Pool">
-        <p className="text-cyan-400/60">{pools ? "Pool not found." : "Loading…"}</p>
+        <p className="text-subtle">{pools ? "Pool not found." : "Loading…"}</p>
       </Page>
     );
   }
@@ -245,7 +245,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
 
   return (
     <Page title="Pool" subtitle={address}>
-      <h2 className="mb-6 text-2xl font-bold text-cyan-200">
+      <h2 className="mb-6 text-2xl font-semibold tracking-tight text-fg">
         <PairLabel x={pool.tokenX} y={pool.tokenY} />
       </h2>
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -264,7 +264,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
       {indexerEnabled && (
         <Panel title="Price (B per A, raw units)" className="mb-6">
           <Sparkline values={(candles.data ?? []).map((c) => c.close)} />
-          <p className="text-xs text-cyan-400/60">Spot ≈ {price.toPrecision(6)}</p>
+          <p className="text-xs text-subtle">Spot ≈ {price.toPrecision(6)}</p>
         </Panel>
       )}
 
@@ -280,25 +280,25 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
 
       {indexerEnabled && (
         <Panel title="Recent swaps">
-          {swaps.data?.length === 0 && <p className="text-sm text-cyan-400/60">No swaps yet.</p>}
-          <div className="divide-y divide-cyan-400/10 text-sm">
+          {swaps.data?.length === 0 && <p className="text-sm text-subtle">No swaps yet.</p>}
+          <div className="divide-y divide-line text-sm">
             {swaps.data?.map((s) => (
               <div
                 key={`${s.transaction_version}-${s.trader}`}
                 className="flex justify-between py-2"
               >
-                <span className="text-cyan-400/70">{shortAddr(s.trader)}</span>
-                <span className="text-cyan-200">
+                <span className="text-muted">{shortAddr(s.trader)}</span>
+                <span className="text-fg">
                   <TokenAmount address={s.token_in} amount={s.amount_in} /> →{" "}
                   <TokenAmount address={s.token_out} amount={s.amount_out} />
                 </span>
-                <span className="hidden text-cyan-400/50 md:inline">
+                <span className="hidden text-subtle md:inline">
                   {new Date(s.ts).toLocaleString()}
                 </span>
               </div>
             ))}
           </div>
-          <p className="mt-2 text-xs text-cyan-400/40">
+          <p className="mt-2 text-xs text-subtle">
             Token in: <TokenSymbol address={pool.tokenX} /> / <TokenSymbol address={pool.tokenY} />
           </p>
         </Panel>

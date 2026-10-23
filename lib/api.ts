@@ -96,7 +96,8 @@ export interface ApiEvent {
 export const indexerEnabled = INDEXER_URL !== "";
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${INDEXER_URL}${path}`);
+  // Bounded so a hung indexer fails fast and callers can fall back to view calls.
+  const res = await fetch(`${INDEXER_URL}${path}`, { signal: AbortSignal.timeout(5_000) });
   if (!res.ok) throw new Error(`Indexer ${res.status} on ${path}`);
   return res.json() as Promise<T>;
 }
