@@ -26,7 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+
 
 # vercel
 .vercel
@@ -34,3 +34,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dependencies / tooling
+node_modules/
+
+# secrets — never commit (enforced by scripts/guard-env.sh)
+.env
+.env.*
+!.env.example
+.aptos/
+*.pem
+*.key
