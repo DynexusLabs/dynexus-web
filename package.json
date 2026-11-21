@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "5.2.1",
-    "@aptos-labs/wallet-adapter-react": "8.3.3",
+    "@aptos-labs/wallet-adapter-react": "9.0.0",
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "5.104.5",
     "next": "16.4.6",
