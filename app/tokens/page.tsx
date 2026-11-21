@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { inputClass, Notice, Page, Panel } from "@/components/dx/ui";
 import { configured, useAccountAddress, useTokens } from "@/hooks/useDynexus";
-import { indexerEnabled } from "@/lib/api";
 import { shortAddr } from "@/lib/format";
 
 export default function TokensPage() {
@@ -19,10 +18,7 @@ export default function TokensPage() {
   );
 
   return (
-    <Page
-      title="Tokens"
-      subtitle={`Tokens forged on Dynexus${indexerEnabled ? " · served by the indexer" : ""}`}
-    >
+    <Page title="Tokens" subtitle="Tokens forged on Dynexus">
       {!configured && <Notice>Contract address not configured.</Notice>}
       <Panel>
         <div className="mb-4 flex flex-col gap-3 md:flex-row">
