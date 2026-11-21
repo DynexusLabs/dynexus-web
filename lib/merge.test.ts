@@ -40,3 +40,30 @@ test("mapLimited respects the limit, keeps order and skips failures", async () =
   expect(peak).toBeLessThanOrEqual(2);
   expect(out).toEqual([10, 20, undefined, 40, 50]);
 });
+
+test("merge treats the short and padded forms of an address as one item", () => {
+  const out = mergeByAddress<Row>(
+    [
+      {
+        address: "0x050590a0c06ef08452db35927d150e9612cebcda4135c9c9dab4256be4b24ac4",
+        reserve: 1n,
+      },
+    ],
+    [{ address: "0x50590a0c06ef08452db35927d150e9612cebcda4135c9c9dab4256be4b24ac4", reserve: 2n }],
+  );
+  expect(out).toHaveLength(1);
+  expect(
+    missingAddresses(["0x50590a0c06ef08452db35927d150e9612cebcda4135c9c9dab4256be4b24ac4"], out),
+  ).toEqual([]);
+});
+
+test("live overrides keyed by the short form still apply to a padded indexer row", () => {
+  const full = "0x050590a0c06ef08452db35927d150e9612cebcda4135c9c9dab4256be4b24ac4";
+  const short = "0x50590a0c06ef08452db35927d150e9612cebcda4135c9c9dab4256be4b24ac4";
+  const out = mergeByAddress<Row>(
+    [{ address: full, reserve: 1n, swaps: 4 }],
+    [],
+    new Map([[short, { reserve: 9n }]]),
+  );
+  expect(out).toEqual([{ address: full, reserve: 9n, swaps: 4 }]);
+});
