@@ -1,5 +1,7 @@
 # Dynexus Web
 
+[![CI](https://github.com/DynexusLabs/dynexus-web/actions/workflows/ci.yml/badge.svg)](https://github.com/DynexusLabs/dynexus-web/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Network: Aptos testnet](https://img.shields.io/badge/network-Aptos%20testnet-00d9ff.svg)](https://aptos.dev)
+
 **Dynexus Web** is the frontend interface that allows users to interact with the Dynexus ecosystem. This web application provides seamless access to key features like governance, token swaps, liquidity pools, and token creation, all built on top of the Aptos blockchain and utilizing the Move programming language.
 
 ## Features
