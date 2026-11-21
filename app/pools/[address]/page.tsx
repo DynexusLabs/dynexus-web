@@ -12,7 +12,7 @@ import {
   Stat,
   TxStatus,
 } from "@/components/dx/ui";
-import { useAccountAddress, useBalance, useMetadata, usePools } from "@/hooks/useDynexus";
+import { useAccountAddress, useBalance, useMetadata, usePool, usePools } from "@/hooks/useDynexus";
 import { useTx } from "@/hooks/useTx";
 import { api, indexerEnabled } from "@/lib/api";
 import { view } from "@/lib/aptos";
@@ -218,7 +218,10 @@ function GaugeStake({ pool, lp }: { pool: string; lp: string }) {
 export default function PoolPage({ params }: { params: Promise<{ address: string }> }) {
   const { address } = use(params);
   const { data: pools } = usePools();
-  const pool = pools?.find((p) => p.address === address);
+  const { data: live, isError: liveFailed } = usePool(address);
+  // Reserves, supply and fees come from the chain; the list row adds indexer-only fields.
+  const listed = pools?.find((p) => p.address === address);
+  const pool = live ? { ...listed, ...live } : listed;
   const candles = useQuery({
     queryKey: ["candles", address],
     enabled: indexerEnabled,
@@ -237,7 +240,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
   if (!pool) {
     return (
       <Page title="Pool">
-        <p className="text-subtle">{pools ? "Pool not found." : "Loading…"}</p>
+        <p className="text-subtle">{pools || liveFailed ? "Pool not found." : "Loading…"}</p>
       </Page>
     );
   }
@@ -258,7 +261,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
           value={<TokenAmount address={pool.tokenY} amount={pool.reserveY} />}
         />
         <Stat label="Fee" value={`${(pool.feeBps + pool.platformFeeBps) / 100}%`} />
-        <Stat label="Swaps 24h" value={pool.swaps24h ?? "—"} />
+        <Stat label="Swaps 24h (indexed)" value={pool.swaps24h ?? "—"} />
       </div>
 
       {indexerEnabled && (
@@ -279,7 +282,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
       )}
 
       {indexerEnabled && (
-        <Panel title="Recent swaps">
+        <Panel title="Recent swaps (indexed, may trail the chain by a few minutes)">
           {swaps.data?.length === 0 && <p className="text-sm text-subtle">No swaps yet.</p>}
           <div className="divide-y divide-line text-sm">
             {swaps.data?.map((s) => (

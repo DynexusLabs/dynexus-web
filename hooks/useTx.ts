@@ -6,6 +6,11 @@ import { useState } from "react";
 import { aptos } from "@/lib/aptos";
 import { fn } from "@/lib/config";
 
+/** Query keys backed by the indexer, which trails the chain by a few minutes. */
+const INDEXER_KEYS = ["stats", "candles", "swaps"];
+/** Refetch those again later so history catches up without a manual reload. */
+const INDEXER_REFETCH_MS = [20_000, 120_000, 420_000];
+
 export type TxState =
   | { status: "idle" }
   | { status: "pending" }
@@ -45,7 +50,12 @@ export function useTx() {
       const done = await aptos.waitForTransaction({ transactionHash: res.hash });
       if (!done.success) throw new Error(done.vm_status);
       setState({ status: "success", hash: res.hash });
+      // Chain-backed data is exact right now; indexer-backed data is refetched on a delay.
       await queryClient.invalidateQueries();
+      for (const ms of INDEXER_REFETCH_MS)
+        setTimeout(() => {
+          for (const key of INDEXER_KEYS) void queryClient.invalidateQueries({ queryKey: [key] });
+        }, ms);
       return true;
     } catch (e) {
       setState({ status: "error", message: friendlyError(e) });

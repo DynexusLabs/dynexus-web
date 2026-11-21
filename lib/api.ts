@@ -85,6 +85,12 @@ export interface ApiGauge {
   bribes: ApiBribe[];
 }
 
+export interface ApiHealth {
+  ok: boolean;
+  latest_version: number | null;
+  processed_version: number | null;
+}
+
 export interface ApiEvent {
   transaction_version: number;
   module: string;
@@ -110,6 +116,7 @@ const qs = (params: Record<string, string | number | undefined>) => {
 };
 
 export const api = {
+  health: () => get<ApiHealth>("/health"),
   stats: () => get<ApiStats>("/stats"),
   tokens: (p: { creator?: string; q?: string; limit?: number; offset?: number } = {}) =>
     get<ApiToken[]>(`/tokens${qs(p)}`),
