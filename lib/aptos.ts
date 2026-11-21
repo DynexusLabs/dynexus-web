@@ -97,3 +97,55 @@ export async function faBalance(owner: string, asset: string): Promise<bigint> {
   });
   return BigInt(bal);
 }
+
+export interface PoolOnChain {
+  address: string;
+  tokenX: string;
+  tokenY: string;
+  reserveX: bigint;
+  reserveY: bigint;
+  lpSupply: bigint;
+  feeBps: number;
+  platformFeeBps: number;
+}
+
+/** Exact, current pool state from two view calls. */
+export async function poolOnChain(address: string): Promise<PoolOnChain> {
+  const [[x, y], info] = await Promise.all([
+    view<[string, string, string]>("dex", "get_pool_tokens", [address]),
+    view<[string, string, string, string, string, string, string]>("dex", "get_pool_info", [
+      address,
+    ]),
+  ]);
+  return {
+    address,
+    tokenX: x,
+    tokenY: y,
+    reserveX: BigInt(info[1]),
+    reserveY: BigInt(info[2]),
+    lpSupply: BigInt(info[3]),
+    feeBps: Number(info[4]),
+    platformFeeBps: Number(info[5]),
+  };
+}
+
+export interface TokenOnChain {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  creator: string;
+  iconUri: string;
+}
+
+export async function tokenOnChain(address: string): Promise<TokenOnChain> {
+  const [creator, name, symbol, decimals, , iconUri] = await view<
+    [string, string, string, number, string, string, string]
+  >("token_factory", "get_token_info", [address]);
+  return { address, name, symbol, decimals: Number(decimals), creator, iconUri };
+}
+
+/** Upper bound for chain-side list reads so one page never fans out unboundedly. */
+export const CHAIN_LIST_CAP = 200;
+/** Parallel view calls per list refresh; public fullnodes rate-limit per IP. */
+export const CHAIN_CONCURRENCY = 6;

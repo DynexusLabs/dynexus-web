@@ -2,21 +2,31 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { api, indexerEnabled } from "@/lib/api";
-import { faBalance, faMetadata, view } from "@/lib/aptos";
+import {
+  aptos,
+  CHAIN_CONCURRENCY,
+  CHAIN_LIST_CAP,
+  faBalance,
+  faMetadata,
+  poolOnChain,
+  tokenOnChain,
+  view,
+} from "@/lib/aptos";
 import { DYNEXUS_ADDRESS } from "@/lib/config";
+import { indexerLagMinutes } from "@/lib/lag";
+import { mapLimited, mergeByAddress, missingAddresses } from "@/lib/merge";
 
 export const configured = DYNEXUS_ADDRESS !== "";
 
-/** Indexer first when configured; on any indexer failure read the chain instead. */
-async function indexerOr<T>(fromIndexer: () => Promise<T>, fromChain: () => Promise<T>) {
-  if (indexerEnabled) {
-    try {
-      return await fromIndexer();
-    } catch (e) {
-      console.warn("Indexer unavailable, reading from chain", e);
-    }
+/** Indexer list, or null when it is off or failing (callers then read the chain). */
+async function fromIndexer<T>(load: () => Promise<T>): Promise<T | null> {
+  if (!indexerEnabled) return null;
+  try {
+    return await load();
+  } catch (e) {
+    console.warn("Indexer unavailable, reading from chain", e);
+    return null;
   }
-  return fromChain();
 }
 
 export function useAccountAddress(): string | undefined {
@@ -72,36 +82,55 @@ export interface TokenRow {
   iconUri: string;
 }
 
-/** Factory tokens: one indexer request, or (no indexer) paginated view calls. */
+/**
+ * Factory tokens. The indexer supplies the list cheaply; the chain is asked only for
+ * tokens the indexer has not seen yet, so a token created seconds ago shows up at once.
+ */
 export function useTokens(creator?: string) {
   return useQuery({
     queryKey: ["tokens", creator],
     enabled: configured,
-    queryFn: (): Promise<TokenRow[]> =>
-      indexerOr(
-        async () =>
-          (await api.tokens({ creator, limit: 200 })).map((t) => ({
+    refetchInterval: 30_000,
+    queryFn: async (): Promise<TokenRow[]> => {
+      const indexed = await fromIndexer(async () =>
+        (await api.tokens({ creator, limit: 200 })).map(
+          (t): TokenRow => ({
             address: t.address,
             name: t.name ?? "",
             symbol: t.symbol ?? "?",
             decimals: t.decimals ?? 0,
             creator: t.creator,
             iconUri: t.icon_uri ?? "",
-          })),
-        async () => {
-          const [addrs] = creator
-            ? await view<[string[]]>("token_factory", "get_tokens_by_creator", [creator])
-            : await view<[string[]]>("token_factory", "get_tokens", [0, 100]);
-          return Promise.all(
-            addrs.map(async (address) => {
-              const [c, name, symbol, decimals, , iconUri] = await view<
-                [string, string, string, number, string, string, string]
-              >("token_factory", "get_token_info", [address]);
-              return { address, name, symbol, decimals: Number(decimals), creator: c, iconUri };
-            }),
+          }),
+        ),
+      );
+      try {
+        let addrs: string[];
+        if (creator) {
+          [addrs] = await view<[string[]]>("token_factory", "get_tokens_by_creator", [creator]);
+        } else {
+          const [, , , , , total] = await view<[string, string, string, string, string, string]>(
+            "token_factory",
+            "get_dynexus_config",
           );
-        },
-      ),
+          // Nothing to ask the chain when the indexer already holds every token.
+          if (indexed && indexed.length >= Number(total)) return indexed;
+          [addrs] = await view<[string[]]>("token_factory", "get_tokens", [
+            0,
+            Math.min(Number(total), CHAIN_LIST_CAP),
+          ]);
+        }
+        const missing = indexed ? missingAddresses(addrs, indexed) : addrs;
+        const rows = await mapLimited(missing, CHAIN_CONCURRENCY, tokenOnChain);
+        return mergeByAddress(
+          indexed ?? [],
+          rows.filter((r) => r !== undefined),
+        );
+      } catch (e) {
+        if (indexed) return indexed; // chain read failed: stale but usable
+        throw e;
+      }
+    },
   });
 }
 
@@ -118,14 +147,19 @@ export interface PoolRow {
   hasGauge?: boolean;
 }
 
+/**
+ * Pools. Reserves, LP supply and fees always come from the chain (exact and instant);
+ * the indexer adds what only history can give (24h swaps, gauge flag) and the cheap list.
+ */
 export function usePools() {
   return useQuery({
     queryKey: ["pools"],
     enabled: configured,
-    queryFn: (): Promise<PoolRow[]> =>
-      indexerOr(
-        async () =>
-          (await api.pools({ limit: 200 })).map((p) => ({
+    refetchInterval: 10_000,
+    queryFn: async (): Promise<PoolRow[]> => {
+      const indexed = await fromIndexer(async () =>
+        (await api.pools({ limit: 200 })).map(
+          (p): PoolRow => ({
             address: p.address,
             tokenX: p.token_x,
             tokenY: p.token_y,
@@ -136,33 +170,50 @@ export function usePools() {
             platformFeeBps: p.platform_fee_bps,
             swaps24h: p.swaps_24h,
             hasGauge: p.has_gauge,
-          })),
-        async () => {
-          const [addrs] = await view<[string[]]>("dex", "get_pools", [0, 100]);
-          return Promise.all(
-            addrs.map(async (address) => {
-              const [[x, y], info] = await Promise.all([
-                view<[string, string, string]>("dex", "get_pool_tokens", [address]),
-                view<[string, string, string, string, string, string, string]>(
-                  "dex",
-                  "get_pool_info",
-                  [address],
-                ),
-              ]);
-              return {
-                address,
-                tokenX: x,
-                tokenY: y,
-                reserveX: BigInt(info[1]),
-                reserveY: BigInt(info[2]),
-                lpSupply: BigInt(info[3]),
-                feeBps: Number(info[4]),
-                platformFeeBps: Number(info[5]),
-              };
-            }),
-          );
-        },
-      ),
+          }),
+        ),
+      );
+      try {
+        const [count] = await view<[string]>("dex", "get_pools_count");
+        // Pool addresses are only needed when the indexer is missing some of them.
+        const chainAddrs =
+          indexed && indexed.length >= Number(count)
+            ? indexed.map((p) => p.address)
+            : (
+                await view<[string[]]>("dex", "get_pools", [
+                  0,
+                  Math.min(Number(count), CHAIN_LIST_CAP),
+                ])
+              )[0];
+        const missing = indexed ? missingAddresses(chainAddrs, indexed) : chainAddrs;
+        const fresh = await mapLimited(
+          [...(indexed?.map((p) => p.address) ?? []), ...missing],
+          CHAIN_CONCURRENCY,
+          poolOnChain,
+        );
+        const live = new Map(
+          fresh.filter((p) => p !== undefined).map((p) => [p.address.toLowerCase(), p]),
+        );
+        const chainOnly = missing.flatMap((a) => {
+          const p = live.get(a.toLowerCase());
+          return p ? [p as PoolRow] : [];
+        });
+        return mergeByAddress(indexed ?? [], chainOnly, live);
+      } catch (e) {
+        if (indexed) return indexed; // chain read failed: stale but usable
+        throw e;
+      }
+    },
+  });
+}
+
+/** One pool's exact current state; used by the swap and pool pages. */
+export function usePool(address?: string) {
+  return useQuery({
+    queryKey: ["pool-live", address],
+    enabled: configured && !!address,
+    refetchInterval: 8_000,
+    queryFn: () => poolOnChain(address as string),
   });
 }
 
@@ -180,4 +231,18 @@ export function useSymbols(addresses: string[]): Record<string, string> {
     map[a] = results[i]?.data?.symbol ?? `${a.slice(0, 6)}…`;
   });
   return map;
+}
+
+/** Estimated minutes the indexer trails the chain head; null when off or unknown. */
+export function useIndexerLag() {
+  return useQuery({
+    queryKey: ["indexer-lag"],
+    enabled: configured && indexerEnabled,
+    refetchInterval: 60_000,
+    retry: false,
+    queryFn: async () => {
+      const [health, ledger] = await Promise.all([api.health(), aptos.getLedgerInfo()]);
+      return indexerLagMinutes(Number(ledger.ledger_version), health.processed_version);
+    },
+  });
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
+import IndexerStatus from "./IndexerStatus";
 import NetworkBanner from "./NetworkBanner";
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -14,6 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </a>
       <Header />
       <NetworkBanner />
+      <IndexerStatus />
       <main id="main" className="flex-1">
         {children}
       </main>
