@@ -15,7 +15,7 @@
     "prepare": "lefthook install"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "5.2.1",
+    "@aptos-labs/ts-sdk": "7.5.0",
     "@aptos-labs/wallet-adapter-react": "8.3.3",
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "5.104.5",
