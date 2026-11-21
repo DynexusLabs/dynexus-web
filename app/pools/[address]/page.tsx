@@ -38,7 +38,7 @@ function AddLiquidity({ x, y, rx, ry }: { x: string; y: string; rx: bigint; ry: 
     error = (e as Error).message;
   }
   // Pool ratio decides the other side; add 1 unit of headroom for rounding.
-  const uy = rx > 0n ? (ux * ry) / rx + 1n : 0n;
+  const uy = rx > 0n && ux > 0n ? (ux * ry) / rx + 1n : 0n;
   if (!error && bx !== undefined && ux > bx) error = "Insufficient balance";
   if (!error && by !== undefined && uy > by) error = "Insufficient balance of second token";
 
@@ -58,7 +58,7 @@ function AddLiquidity({ x, y, rx, ry }: { x: string; y: string; rx: bigint; ry: 
         />
       </Field>
       <p className="mb-4 text-sm text-muted">
-        Requires ≈ {my ? <TokenAmount address={y} amount={uy} /> : "…"}
+        Requires ≈ {my && ux > 0n ? <TokenAmount address={y} amount={uy} /> : "—"}
       </p>
       <ActionButton
         disabled={!user || ux === 0n || !!error || state.status === "pending"}
@@ -222,6 +222,8 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
   // Reserves, supply and fees come from the chain; the list row adds indexer-only fields.
   const listed = pools?.find((p) => p.address === address);
   const pool = live ? { ...listed, ...live } : listed;
+  const { data: metaX } = useMetadata(pool?.tokenX);
+  const { data: metaY } = useMetadata(pool?.tokenY);
   const candles = useQuery({
     queryKey: ["candles", address],
     enabled: indexerEnabled,
@@ -244,7 +246,10 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
       </Page>
     );
   }
-  const price = pool.reserveX > 0n ? Number(pool.reserveY) / Number(pool.reserveX) : 0;
+  // Raw reserves are in base units; scale by the decimals gap so the price is B per A as shown.
+  const decimalScale = 10 ** ((metaX?.decimals ?? 0) - (metaY?.decimals ?? 0));
+  const price =
+    pool.reserveX > 0n ? (Number(pool.reserveY) / Number(pool.reserveX)) * decimalScale : 0;
 
   return (
     <Page title="Pool" subtitle={address}>
@@ -265,8 +270,8 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
       </div>
 
       {indexerEnabled && (
-        <Panel title="Price (B per A, raw units)" className="mb-6">
-          <Sparkline values={(candles.data ?? []).map((c) => c.close)} />
+        <Panel title="Price (B per A)" className="mb-6">
+          <Sparkline values={(candles.data ?? []).map((c) => c.close * decimalScale)} />
           <p className="text-xs text-subtle">Spot ≈ {price.toPrecision(6)}</p>
         </Panel>
       )}
