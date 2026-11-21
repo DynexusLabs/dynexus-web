@@ -23,6 +23,7 @@ import {
   useTokens,
 } from "@/hooks/useDynexus";
 import { useTx } from "@/hooks/useTx";
+import { sameAddress } from "@/lib/address";
 import { view } from "@/lib/aptos";
 import { MAX_LOCK, WEEK } from "@/lib/config";
 import { fromUnits, timeLeft, toUnits } from "@/lib/format";
@@ -200,7 +201,7 @@ function VotePanel({ epoch }: { epoch: number }) {
       {gauges?.length === 0 && <p className="text-sm text-subtle">No gauges yet.</p>}
       <div className="mb-4 divide-y divide-line">
         {gauges?.map((g) => {
-          const pool = pools?.find((p) => p.address === g.pool);
+          const pool = pools?.find((p) => sameAddress(p.address, g.pool));
           const share = total > 0n ? Number((g.votes * 10_000n) / total) / 100 : 0;
           return (
             <div key={g.pool} className="flex items-center justify-between gap-3 py-2 text-sm">
@@ -324,7 +325,7 @@ function BribePanel({ epoch }: { epoch: number }) {
       {pool && pools && (
         <p className="-mt-2 mb-3 text-xs text-muted">
           {(() => {
-            const p = pools.find((x) => x.address === pool);
+            const p = pools.find((x) => sameAddress(x.address, pool));
             return p ? <PairLabel x={p.tokenX} y={p.tokenY} /> : null;
           })()}
         </p>

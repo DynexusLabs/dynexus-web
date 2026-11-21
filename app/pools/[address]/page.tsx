@@ -14,6 +14,7 @@ import {
 } from "@/components/dx/ui";
 import { useAccountAddress, useBalance, useMetadata, usePool, usePools } from "@/hooks/useDynexus";
 import { useTx } from "@/hooks/useTx";
+import { sameAddress } from "@/lib/address";
 import { api, indexerEnabled } from "@/lib/api";
 import { view } from "@/lib/aptos";
 import { applySlippage, fromUnits, shortAddr, toUnits } from "@/lib/format";
@@ -220,7 +221,7 @@ export default function PoolPage({ params }: { params: Promise<{ address: string
   const { data: pools } = usePools();
   const { data: live, isError: liveFailed } = usePool(address);
   // Reserves, supply and fees come from the chain; the list row adds indexer-only fields.
-  const listed = pools?.find((p) => p.address === address);
+  const listed = pools?.find((p) => sameAddress(p.address, address));
   const pool = live ? { ...listed, ...live } : listed;
   const { data: metaX } = useMetadata(pool?.tokenX);
   const { data: metaY } = useMetadata(pool?.tokenY);

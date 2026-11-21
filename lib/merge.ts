@@ -3,7 +3,9 @@
  * (exact and instant). Items are keyed by on-chain address.
  */
 
-const norm = (address: string) => address.toLowerCase();
+import { normalizeAddress } from "./address";
+
+const norm = normalizeAddress;
 
 /** Addresses present on chain but missing from the indexer result. */
 export function missingAddresses(chain: string[], indexed: { address: string }[]): string[] {
@@ -20,10 +22,12 @@ export function mergeByAddress<T extends { address: string }>(
   chainOnly: T[],
   live: Map<string, Partial<T>> = new Map(),
 ): T[] {
+  // Callers key the overrides by whatever spelling they have; compare in normalized form.
+  const overrides = new Map([...live].map(([address, patch]) => [norm(address), patch]));
   const out = new Map<string, T>();
   for (const row of [...indexed, ...chainOnly]) {
     const key = norm(row.address);
-    if (!out.has(key)) out.set(key, { ...row, ...live.get(key) });
+    if (!out.has(key)) out.set(key, { ...row, ...overrides.get(key) });
   }
   return [...out.values()];
 }
