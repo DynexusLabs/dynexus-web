@@ -266,6 +266,14 @@ function BribePanel({ epoch }: { epoch: number }) {
   const add = useTx();
   const claim = useTx();
 
+  // <option> only takes text, so build the pair name here instead of using PairLabel.
+  const symbolOf = (a: string) =>
+    tokens?.find((t) => sameAddress(t.address, a))?.symbol ?? `${a.slice(0, 6)}…`;
+  const gaugeName = (g: string) => {
+    const p = pools?.find((x) => sameAddress(x.address, g));
+    return p ? `${symbolOf(p.tokenX)} / ${symbolOf(p.tokenY)}` : `${g.slice(0, 10)}…`;
+  };
+
   const { data: gaugePools } = useQuery({
     queryKey: ["gauge-list"],
     queryFn: async () => (await view<[string[]]>("voter", "get_gauges"))[0],
@@ -317,7 +325,7 @@ function BribePanel({ epoch }: { epoch: number }) {
           <option value="">Select gauge</option>
           {(gaugePools ?? []).map((g) => (
             <option key={g} value={g}>
-              {g.slice(0, 10)}…
+              {gaugeName(g)}
             </option>
           ))}
         </select>
