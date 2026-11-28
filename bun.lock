@@ -21,7 +21,7 @@
         "@tailwindcss/postcss": "^4.3.5",
         "@types/bun": "^1.4.5",
         "@types/node": "^22",
-        "@types/react": "19.3.0",
+        "@types/react": "19.3.2",
         "@types/react-dom": "19.3.0",
         "lefthook": "2.2.2",
         "postcss": "^8",
@@ -41,6 +41,8 @@
     "@aptos-connect/wallet-adapter-plugin": ["@aptos-connect/wallet-adapter-plugin@3.0.4", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "@aptos-labs/wallet-standard": "^0.5.0", "@identity-connect/crypto": "0.3.1", "@identity-connect/dapp-sdk": "0.16.2" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6" } }, "sha512-E10XgQ1CU0zpKKPD9hHh2mM4kbLc52QDgShLxL8Qe8On7LN2Wuc1dJdcRqrbIS9J5yqSgVGJ/G+T+hdpoI09Jg=="],
 
     "@aptos-connect/wallet-api": ["@aptos-connect/wallet-api@0.6.1", "", { "dependencies": { "@aptos-labs/wallet-standard": "^0.5.2", "@identity-connect/api": "0.8.0" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6" } }, "sha512-ai9Xw5Nu+wcWleK6hsMBMCBNGnat3wYiXXlTMUIoKcwcnk/AdMBdDk69r7PeZD8JqwBYLTRGCAI87XrtR+8zig=="],
+
+    "@aptos-connect/web-transport": ["@aptos-connect/web-transport@0.6.2", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "uuid": "^9.0.1" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6", "@aptos-labs/wallet-standard": "^0.5.0", "@telegram-apps/bridge": "^1.0.0" } }, "sha512-HWmMJ8FS3/gueTi5RBV22/gAFXJuL08Fefc8qbuTgdYxxoxSPRWnc3OGMfXQl00x8z+LvdVyyyong0V7Z8PvUg=="],
 
     "@aptos-labs/aptos-cli": ["@aptos-labs/aptos-cli@3.0.1", "", { "dependencies": { "commander": "^15.0.0" }, "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "arm64", ], "bin": { "aptos": "dist/aptos.js" } }, "sha512-GjRI1up0OBxkk7VMakxmJcniyAeRRzCuTryNQpG1XlNLFUKdnp/IBF2ENrG2yzB7HOJXBxPhheAifKHy3yVz/A=="],
 
@@ -129,6 +131,8 @@
     "@identity-connect/api": ["@identity-connect/api@0.8.0", "", {}, "sha512-BZQxaJnm3hkpwMGUio35ik28I8JomWIzPZn/lBl3ErrvUo02+2ixaYtVwD4MvC9RMY54AZvQaHfyFjuCaaM9+g=="],
 
     "@identity-connect/crypto": ["@identity-connect/crypto@0.3.1", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "@noble/hashes": "^1.3.1", "ed2curve": "^0.3.0", "tweetnacl": "^1.0.3" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6" } }, "sha512-Y4sZf6gKqJpuRIIpiFFPKfxO/Fg8Nth3Svnue5Z6IDeQDszf9RgQDvimKKz+4OsHzEniyLkjRxwjjmzx6WRN3g=="],
+
+    "@identity-connect/dapp-sdk": ["@identity-connect/dapp-sdk@0.16.2", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "@aptos-connect/web-transport": "0.6.2", "@identity-connect/api": "0.8.0", "@identity-connect/crypto": "0.3.1", "@identity-connect/wallet-api": "0.2.0", "axios": "^1.9.0", "uuid": "^9.0.1" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6", "@aptos-labs/wallet-standard": "^0.5.0" } }, "sha512-11SaXsvMqZzT/oBOfpq/fuQN1hb7IkWDbFdHxUMY9g1Rvj49madaaSeJ7gzi9nVeMOON+7NioBfIyFcfV+730w=="],
 
     "@identity-connect/wallet-api": ["@identity-connect/wallet-api@0.2.0", "", { "peerDependencies": { "@aptos-labs/ts-sdk": "^1.33.1 || ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0" } }, "sha512-23Toe3bxeUN/DLsbBVYbt7gmG+msxxzAh19nXYjj32ybz0mKLLsdQWTf/nzqesmMD7r2u8QCF1ZYclm8Oie2Kg=="],
 
@@ -326,7 +330,7 @@
 
     "@types/normalize-package-data": ["@types/normalize-package-data@2.4.4", "", {}, "sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA=="],
 
-    "@types/react": ["@types/react@19.3.0", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg=="],
+    "@types/react": ["@types/react@19.3.2", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-0QJbb58RxWJL3VAa5tvk7QhJamz0S+MpFL2xDuF/+THRR+kldyhPjRZ1iwvK45AEHZ1BVGS3otPsl7QlNVRizQ=="],
 
     "@types/react-dom": ["@types/react-dom@19.3.0", "", { "peerDependencies": { "@types/react": "^19.3.0" } }, "sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q=="],
 
@@ -718,11 +722,13 @@
 
     "@aptos-connect/wallet-adapter-plugin/@aptos-labs/wallet-standard": ["@aptos-labs/wallet-standard@0.5.2", "", { "peerDependencies": { "@aptos-labs/ts-sdk": "^3.1.3 || ^4.0.0 || ^5.0.0", "@wallet-standard/core": "^1.0.3" } }, "sha512-aFQOMLLRSmEYXHBGzhLGSOICoQRKqrtRyaMR7kDdyKtEI+4Ocgf2QeW+5yNZEUKoeWlydcBZGIuO7xAQpWU7dw=="],
 
-    "@aptos-connect/wallet-adapter-plugin/@identity-connect/dapp-sdk": ["@identity-connect/dapp-sdk@0.16.2", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "@aptos-connect/web-transport": "0.6.2", "@identity-connect/api": "0.8.0", "@identity-connect/crypto": "0.3.1", "@identity-connect/wallet-api": "0.2.0", "axios": "^1.9.0", "uuid": "^9.0.1" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6", "@aptos-labs/wallet-standard": "^0.5.0" } }, "sha512-11SaXsvMqZzT/oBOfpq/fuQN1hb7IkWDbFdHxUMY9g1Rvj49madaaSeJ7gzi9nVeMOON+7NioBfIyFcfV+730w=="],
-
     "@aptos-connect/wallet-api/@aptos-labs/wallet-standard": ["@aptos-labs/wallet-standard@0.5.2", "", { "peerDependencies": { "@aptos-labs/ts-sdk": "^3.1.3 || ^4.0.0 || ^5.0.0", "@wallet-standard/core": "^1.0.3" } }, "sha512-aFQOMLLRSmEYXHBGzhLGSOICoQRKqrtRyaMR7kDdyKtEI+4Ocgf2QeW+5yNZEUKoeWlydcBZGIuO7xAQpWU7dw=="],
 
+    "@aptos-connect/web-transport/@aptos-labs/wallet-standard": ["@aptos-labs/wallet-standard@0.5.2", "", { "peerDependencies": { "@aptos-labs/ts-sdk": "^3.1.3 || ^4.0.0 || ^5.0.0", "@wallet-standard/core": "^1.0.3" } }, "sha512-aFQOMLLRSmEYXHBGzhLGSOICoQRKqrtRyaMR7kDdyKtEI+4Ocgf2QeW+5yNZEUKoeWlydcBZGIuO7xAQpWU7dw=="],
+
     "@identity-connect/crypto/@noble/hashes": ["@noble/hashes@1.8.0", "", {}, "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="],
+
+    "@identity-connect/dapp-sdk/@aptos-labs/wallet-standard": ["@aptos-labs/wallet-standard@0.5.2", "", { "peerDependencies": { "@aptos-labs/ts-sdk": "^3.1.3 || ^4.0.0 || ^5.0.0", "@wallet-standard/core": "^1.0.3" } }, "sha512-aFQOMLLRSmEYXHBGzhLGSOICoQRKqrtRyaMR7kDdyKtEI+4Ocgf2QeW+5yNZEUKoeWlydcBZGIuO7xAQpWU7dw=="],
 
     "@tailwindcss/node/tailwindcss": ["tailwindcss@4.3.5", "", {}, "sha512-FcQk9BuffmEHJP2G0XmB2SplU1aLTI7j07Kunk+U74Ny+XiWOtzXz9aujFZ/avntw1e2cOv/3PkgzflQ7gX2vQ=="],
 
@@ -765,8 +771,6 @@
     "table/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
 
     "wrap-ansi/string-width": ["string-width@7.2.0", "", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, "sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ=="],
-
-    "@aptos-connect/wallet-adapter-plugin/@identity-connect/dapp-sdk/@aptos-connect/web-transport": ["@aptos-connect/web-transport@0.6.2", "", { "dependencies": { "@aptos-connect/wallet-api": "0.6.1", "uuid": "^9.0.1" }, "peerDependencies": { "@aptos-labs/ts-sdk": "^5 || ^6", "@aptos-labs/wallet-standard": "^0.5.0", "@telegram-apps/bridge": "^1.0.0" } }, "sha512-HWmMJ8FS3/gueTi5RBV22/gAFXJuL08Fefc8qbuTgdYxxoxSPRWnc3OGMfXQl00x8z+LvdVyyyong0V7Z8PvUg=="],
 
     "@textlint/linter-formatter/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 
